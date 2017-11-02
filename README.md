@@ -1,5 +1,4 @@
 ## A Diablo 2-style inventory system for Unity3D
-Work in progress!
 
 <img src="Documentation/inventory1.gif?raw=true" alt="Zenject" width="512px" height="512px"/>
 
@@ -10,11 +9,16 @@ Work in progress!
 - <a href="#license">License</a>
 
 ## <a id="features"></a>Features
-- Feature A
-- Feature B
+- Resize at runtime, dropping what no longer fits.
+- Add/Remove and check if an item fits from code.
+- Custom item size and shape.
+- Rearrange items by draggin and dropping, with visual feedback.
+- Move items between different inventories.
+- Remove items by dropping them outside the inventory.
+- Easily add custom graphics and change the size of your inventory.
 
 ## <a id="installation"></a>Installation
-How to install
+Simply copy the folder named "Plugins" into your project and you're good to go. Optionally, you can add the folder named "Example" to get started right away.
 
 ## <a id="documentation"></a>Documentation
 Docs on various parts of the system
