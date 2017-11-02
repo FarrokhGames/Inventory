@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace FarrokhGames.Examples
+namespace FarrokhGames.Inventory.Examples
 {
     /// <summary>
     /// Example Lobby class
@@ -10,19 +10,19 @@ namespace FarrokhGames.Examples
     {
         [SerializeField] private int _width = 8;
         [SerializeField] private int _height = 4;
-        [SerializeField] private InventoryItemManifest[] _itemsManifests;
+        [SerializeField] private ItemDefinition[] _definitions;
         [SerializeField] private bool _fillEmpty = false; // Should the inventory get completely filled?
 
         void Start()
         {
             // Create inventory
-            var inventory = new Inventory(_width, _height);
+            var inventory = new InventoryManager(_width, _height);
 
             // Fill inventory with random items
             var tries = (_width * _height) / 3;
             for (var i = 0; i < tries; i++)
             {
-                inventory.Add(_itemsManifests[Random.Range(0, _itemsManifests.Length)].GetItem());
+                inventory.Add(_definitions[Random.Range(0, _definitions.Length)].CreateInstance());
             }
 
             // Fill empty slots with first (1x1) item
@@ -30,7 +30,7 @@ namespace FarrokhGames.Examples
             {
                 for (var i = 0; i < _width * _height; i++)
                 {
-                    inventory.Add(_itemsManifests[0].GetItem());
+                    inventory.Add(_definitions[0].CreateInstance());
                 }
             }
 

@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace FarrokhGames
+namespace FarrokhGames.Inventory
 {
     /// <summary>
     /// Custom Property Drawer for InventoryShape

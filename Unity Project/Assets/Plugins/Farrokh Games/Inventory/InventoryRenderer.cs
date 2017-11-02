@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using FarrokhGames.Shared;
 using System;
 
-namespace FarrokhGames
+namespace FarrokhGames.Inventory
 {
     /// <summary>
     /// Renders a given inventory
@@ -24,11 +24,11 @@ namespace FarrokhGames
         [SerializeField, Tooltip("The sprite to use for blocked cells")]
         private Sprite _cellSpriteBlocked;
 
-        internal Inventory _inventory = null;
+        internal InventoryManager _inventory = null;
         private bool _haveListeners = false;
         private Pool<Image> _imagePool;
         private Image[] _grids = null;
-        private Dictionary<InventoryItem, Image> _items = new Dictionary<InventoryItem, Image>();
+        private Dictionary<IInventoryItem, Image> _items = new Dictionary<IInventoryItem, Image>();
 
         /*
 		 * Setup
@@ -60,7 +60,7 @@ namespace FarrokhGames
         /// Set what inventory to use when rendering
         /// </summary>
         /// <param name="inventory">Inventory to use</param>
-        public void SetInventory(Inventory inventory)
+        public void SetInventory(InventoryManager inventory)
         {
             if (inventory == null) { throw new ArgumentNullException("inventory"); }
             OnDisable();
@@ -187,7 +187,7 @@ namespace FarrokhGames
         /*
         Handler for when Inventory.OnItemAdded is invoked
         */
-        private void HandleItemAdded(InventoryItem item)
+        private void HandleItemAdded(IInventoryItem item)
         {
             var img = CreateImage(item.Sprite, false);
             img.gameObject.name = item.Name;
@@ -198,7 +198,7 @@ namespace FarrokhGames
         /*
         Handler for when Inventory.OnItemRemoved is invoked
         */
-        private void HandleItemRemoved(InventoryItem item)
+        private void HandleItemRemoved(IInventoryItem item)
         {
             if (_items.ContainsKey(item))
             {
@@ -249,10 +249,10 @@ namespace FarrokhGames
         /// <param name="item">Item to select</param>
         /// <param name="blocked">Should the selection be rendered as blocked</param>
         /// <param name="color">The color of the selection</param>
-        public void SelectItem(InventoryItem item, bool blocked, Color color)
+        public void SelectItem(IInventoryItem item, bool blocked, Color color)
         {
             if (item == null) { return; }
-            Select(item.Points, blocked, color);
+            Select(item.Shape.Points, blocked, color);
         }
 
         /// <summary>
@@ -302,10 +302,10 @@ namespace FarrokhGames
         /*
         Returns the appropriate offset of an item to make it fit nicely in the grid
         */
-        internal Vector2 GetItemOffset(InventoryItem item)
+        internal Vector2 GetItemOffset(IInventoryItem item)
         {
-            var x = (-(_inventory.Width * 0.5f) + item.Position.x + ((float)item.Width * 0.5f)) * CellSize.x;
-            var y = (-(_inventory.Height * 0.5f) + item.Position.y + ((float)item.Height * 0.5f)) * CellSize.y;
+            var x = (-(_inventory.Width * 0.5f) + item.Shape.Position.x + ((float)item.Shape.Width * 0.5f)) * CellSize.x;
+            var y = (-(_inventory.Height * 0.5f) + item.Shape.Position.y + ((float)item.Shape.Height * 0.5f)) * CellSize.y;
             return new Vector2(x, y);
         }
     }

@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FarrokhGames.Shared;
 using UnityEngine;
 
-namespace FarrokhGames
+namespace FarrokhGames.Inventory
 {
     /// <summary>
-    /// Class for storing the shape of an inventory item
+    /// Class for storing the shape and position of an inventory item
     /// </summary>
     [Serializable]
     public class InventoryShape
@@ -14,8 +15,10 @@ namespace FarrokhGames
         [SerializeField] int _width;
         [SerializeField] int _height;
         [SerializeField] bool[] _shape;
-        private Point[] _points;
-        private bool _haveBuiltPoints = false;
+
+        private Point _position = Point.zero;
+        private Point[] _originalPoints;
+        private bool _haveBuiltOriginalPoints = false;
 
         /// <summary>
         /// Constructor
@@ -27,6 +30,7 @@ namespace FarrokhGames
             _width = width;
             _height = height;
             _shape = new bool[_width * _height];
+            Recalculate();
         }
 
         /// <summary>
@@ -45,6 +49,7 @@ namespace FarrokhGames
                     _shape[GetIndex(x, y)] = shape[x, y];
                 }
             }
+            Recalculate();
         }
 
         /// <summary>
@@ -55,39 +60,89 @@ namespace FarrokhGames
         /// <summary>
         /// Returns the height of the shapes bounding box
         /// </summary>
-        /// <returns></returns>
         public int Height { get { return _height; } }
 
         /// <summary>
-        /// Returns a list of points representing the shape in local space
+        /// Gets or sets the positon of this shape
         /// </summary>
-        public Point[] Points
+        public Point Position
         {
-            get
+            get { return _position; }
+            set
             {
-                if (!_haveBuiltPoints)
-                {
-                    var p = new List<Point>();
-                    for (int x = 0; x < Width; x++)
-                    {
-                        for (int y = 0; y < Height; y++)
-                        {
-                            if (Get(x, y)) { p.Add(new Point(x, y)); }
-                        }
-                    }
-                    _points = p.ToArray();
-                    _haveBuiltPoints = true;
-                }
-                return _points;
+                _position = value;
+                Recalculate();
             }
         }
 
+        /// <summary>
+        /// Returns the rect for this shape (adjusted by its current position)
+        /// </summary>
+        public Rect Rect { get; private set; }
+
+        /// <summary>
+        /// Returns the points making up this shape, adjusted for current position
+        /// </summary>
+        public Point[] Points { get; private set; }
+
         /*
-        Returns if given internal point is free or occupied by the shape
+        Recalculates the rectangle and points and adjusts them by the current position)
         */
-        private bool Get(int x, int y)
+        private void Recalculate()
         {
-            return _shape[GetIndex(x, y)];
+            // Create adjusted rect
+            Rect = new Rect(Position, Vector2.Max(Vector2.one, new Vector2(Width, Height)));
+
+            // Build original points (This only happens once)
+            if (!_haveBuiltOriginalPoints)
+            {
+                var p = new List<Point>();
+                for (int x = 0; x < Width; x++)
+                {
+                    for (int y = 0; y < Height; y++)
+                    {
+                        if (_shape[GetIndex(x, y)]) { p.Add(new Point(x, y)); }
+                    }
+                }
+                _originalPoints = p.ToArray();
+                _haveBuiltOriginalPoints = true;
+            }
+
+            // Create adjusted points
+            Points = new Point[_originalPoints.Length];
+            for (int i = 0; i < _originalPoints.Length; i++)
+            {
+                Points[i] = _originalPoints[i] + Position;
+            }
+        }
+
+        /// <summary>
+        /// Returns true of this item is occupying the given point
+        /// </summary>
+        /// <param name="point">The point to check</param>
+        public bool Contains(Point point)
+        {
+            return Points.Contains(point);
+        }
+
+        /// <summary>
+        /// Returns true of this item overlaps the given item
+        /// </summary>
+        /// <param name="otherShape">Other shape to check</param>
+        public bool Overlaps(InventoryShape otherShape)
+        {
+            if (Rect.Overlaps(otherShape.Rect)) // Check rect first since its faster
+            {
+                // Check point by point to account for shape
+                for (int i = 0; i < Points.Length; i++)
+                {
+                    if (otherShape.Contains(Points[i]))
+                    {
+                        return true; // Items overlap
+                    }
+                }
+            }
+            return false; // Items does not overlap
         }
 
         /*

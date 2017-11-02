@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace FarrokhGames
+namespace FarrokhGames.Inventory
 {
     /// <summary>
     /// Enables human interaction with an inventory renderer using Unity's event systems
@@ -19,8 +19,8 @@ namespace FarrokhGames
         private static DraggedItem _draggedItem = null;
 
         private InventoryRenderer _renderer;
-        private Inventory _inventory { get { return _renderer._inventory; } }
-        private InventoryItem _itemToDrag;
+        private InventoryManager _inventory { get { return _renderer._inventory; } }
+        private IInventoryItem _itemToDrag;
 
         /*
 		 * Setup
@@ -60,7 +60,7 @@ namespace FarrokhGames
                 // Create a dragged item 
                 _draggedItem = new DraggedItem(
                     this,
-                    _itemToDrag.Position,
+                    _itemToDrag.Shape.Position,
                     _itemToDrag,
                     offset
                 );
@@ -139,10 +139,10 @@ namespace FarrokhGames
         /*
          * Returns the offset between dragged item and the grid 
          */
-        private Vector2 GetDraggedItemOffset(InventoryItem item)
+        private Vector2 GetDraggedItemOffset(IInventoryItem item)
         {
-            var gx = -((item.Width * _renderer.CellSize.x) / 2f) + (_renderer.CellSize.x / 2);
-            var gy = -((item.Height * _renderer.CellSize.y) / 2f) + (_renderer.CellSize.y / 2);
+            var gx = -((item.Shape.Width * _renderer.CellSize.x) / 2f) + (_renderer.CellSize.x / 2);
+            var gy = -((item.Shape.Height * _renderer.CellSize.y) / 2f) + (_renderer.CellSize.y / 2);
             return new Vector2(gx, gy);
         }
 
@@ -164,7 +164,7 @@ namespace FarrokhGames
             /// <summary>
             /// Returns the item-instance that is being dragged
             /// </summary>
-            public InventoryItem Item { get; private set; }
+            public IInventoryItem Item { get; private set; }
 
             /// <summary>
             /// Gets or sets the InventoryController currently in control of this item
@@ -184,7 +184,7 @@ namespace FarrokhGames
             public DraggedItem(
                 InventoryController originalController,
                 Point originPoint,
-                InventoryItem item,
+                IInventoryItem item,
                 Vector2 offset)
             {
                 OriginalController = originalController;
@@ -217,8 +217,8 @@ namespace FarrokhGames
                     // Make selections
                     if (CurrentController != null)
                     {
-                        _draggedItem.Item.Position = CurrentController.ScreenToGrid(value + _offset + CurrentController.GetDraggedItemOffset(_draggedItem.Item));
-                        var canAdd = CurrentController._inventory.CanAddAt(_draggedItem.Item, _draggedItem.Item.Position);
+                        _draggedItem.Item.Shape.Position = CurrentController.ScreenToGrid(value + _offset + CurrentController.GetDraggedItemOffset(_draggedItem.Item));
+                        var canAdd = CurrentController._inventory.CanAddAt(_draggedItem.Item, _draggedItem.Item.Shape.Position);
                         CurrentController._renderer.SelectItem(_draggedItem.Item, !canAdd, Color.white);
                     }
 

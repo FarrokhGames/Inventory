@@ -3,27 +3,27 @@ using System.Collections.Generic;
 using FarrokhGames.Shared;
 using UnityEngine;
 
-namespace FarrokhGames
+namespace FarrokhGames.Inventory
 {
     /// <summary>
     /// Inventory Class
     /// </summary>
-    public class Inventory
+    public class InventoryManager
     {
         /// <summary>
         /// Invoked when an item is added to the inventory
         /// </summary>
-        public Action<InventoryItem> OnItemAdded;
+        public Action<IInventoryItem> OnItemAdded;
 
         /// <summary>
         /// Invoked when an item is removed to the inventory
         /// </summary>
-        public Action<InventoryItem> OnItemRemoved;
+        public Action<IInventoryItem> OnItemRemoved;
 
         /// <summary>
         /// Invoked when an item is removed from the inventory and should be placed on the ground.
         /// </summary>
-        public Action<InventoryItem> OnItemDropped;
+        public Action<IInventoryItem> OnItemDropped;
 
         /// <summary>
         /// Invoked when the inventory is cleared.
@@ -45,7 +45,7 @@ namespace FarrokhGames
         /// </summary>
         public int Height { get; private set; }
 
-        private List<InventoryItem> _items = new List<InventoryItem>();
+        private List<IInventoryItem> _items = new List<IInventoryItem>();
         private Rect _fullRect;
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace FarrokhGames
         /// </summary>
         /// <param name="width">Width of this inventory</param>
         /// <param name="height">Height of this inventory</param>
-        public Inventory(int width, int height)
+        public InventoryManager(int width, int height)
         {
             SetSize(width, height);
         }
@@ -71,14 +71,13 @@ namespace FarrokhGames
         /// <summary>
         /// Returns a list of all items within this inventory
         /// </summary>
-        public List<InventoryItem> AllItems { get { return new List<InventoryItem>(_items); } }
+        public List<IInventoryItem> AllItems { get { return new List<IInventoryItem>(_items); } }
 
         /// <summary>
         /// Returns true of given item is within this inventory
         /// </summary>
         /// <param name="item">Item to look for</param>
-        /// <returns></returns>
-        public bool Contains(InventoryItem item) { return _items.Contains(item); }
+        public bool Contains(IInventoryItem item) { return _items.Contains(item); }
 
         /// <summary>
         /// Returns true if this inventory is full
@@ -102,7 +101,7 @@ namespace FarrokhGames
         /// Returns true if its possible to add given item.
         /// </summary>
         /// <param name="item">Item to check</param>
-        public bool CanAdd(InventoryItem item)
+        public bool CanAdd(IInventoryItem item)
         {
             if (_items.Contains(item)) return false;
             return GetFirstPointThatFitsItem(item).x != -1;
@@ -112,7 +111,7 @@ namespace FarrokhGames
         /// Add given item to the inventory
         /// </summary>
         /// <param name="item">Item to add</param>
-        public void Add(InventoryItem item)
+        public void Add(IInventoryItem item)
         {
             if (!CanAdd(item)) return;
             var freePoint = GetFirstPointThatFitsItem(item);
@@ -125,25 +124,25 @@ namespace FarrokhGames
         /// </summary>
         /// <param name="item">Item to check</param>
         /// <param name="point">Point at which to check</param>
-        public bool CanAddAt(InventoryItem item, Point point)
+        public bool CanAddAt(IInventoryItem item, Point point)
         {
-            var previousPoint = item.Position;
-            item.Position = point;
+            var previousPoint = item.Shape.Position;
+            item.Shape.Position = point;
             var padding = Vector2.one * 0.01f;
 
             // Check if item is outside of inventory
-            if (!_fullRect.Contains(item.Rect.min + padding) || !_fullRect.Contains(item.Rect.max - padding))
+            if (!_fullRect.Contains(item.Shape.Rect.min + padding) || !_fullRect.Contains(item.Shape.Rect.max - padding))
             {
-                item.Position = previousPoint;
+                item.Shape.Position = previousPoint;
                 return false;
             }
 
             // Check if item overlaps another item already in the inventory
             foreach (var i in _items)
             {
-                if (item.Overlaps(i))
+                if (item.Shape.Overlaps(i.Shape))
                 {
-                    item.Position = previousPoint;
+                    item.Shape.Position = previousPoint;
                     return false;
                 }
             }
@@ -156,13 +155,13 @@ namespace FarrokhGames
         /// </summary>
         /// <param name="item">Item to add</param>
         /// <param name="Point">Point at which to add item</param>
-        public void AddAt(InventoryItem item, Point Point)
+        public void AddAt(IInventoryItem item, Point Point)
         {
             if (!CanAdd(item)) return;
             if (CanAddAt(item, Point))
             {
                 _items.Add(item);
-                item.Position = Point;
+                item.Shape.Position = Point;
                 if (OnItemAdded != null) { OnItemAdded(item); }
             }
         }
@@ -171,7 +170,7 @@ namespace FarrokhGames
         /// Returns true if its possible to remove given item
         /// </summary>
         /// <param name="item">Item to check</param>
-        public bool CanRemove(InventoryItem item)
+        public bool CanRemove(IInventoryItem item)
         {
             return Contains(item);
         }
@@ -180,7 +179,7 @@ namespace FarrokhGames
         /// Removes given item from this inventory
         /// </summary>
         /// <param name="item">Item to remove</param>
-        public void Remove(InventoryItem item)
+        public void Remove(IInventoryItem item)
         {
             if (CanRemove(item))
             {
@@ -193,7 +192,7 @@ namespace FarrokhGames
         /// Removes an item from this inventory and invokes OnItemDropped
         /// </summary>
         /// <param name="item"></param>
-        public void Drop(InventoryItem item)
+        public void Drop(IInventoryItem item)
         {
             Remove(item);
             if (OnItemDropped != null) { OnItemDropped(item); }
@@ -224,11 +223,11 @@ namespace FarrokhGames
         /// Get an item at given point within this inventory
         /// </summary>
         /// <param name="point">Point at which to look for item</param>
-        public InventoryItem GetAtPoint(Point point)
+        public IInventoryItem GetAtPoint(Point point)
         {
             foreach (var item in _items)
             {
-                if (item.Contains(point)) { return item; }
+                if (item.Shape.Contains(point)) { return item; }
             }
             return null;
         }
@@ -248,9 +247,9 @@ namespace FarrokhGames
             {
                 var item = _items[i];
                 var shouldBeDropped = false;
-                for (int j = 0; j < item.Points.Length; j++)
+                for (int j = 0; j < item.Shape.Points.Length; j++)
                 {
-                    if (!_fullRect.Contains(item.Points[j].ToVector2()))
+                    if (!_fullRect.Contains(item.Shape.Points[j].ToVector2()))
                     {
                         shouldBeDropped = true;
                         break;
@@ -273,11 +272,11 @@ namespace FarrokhGames
         /*
          * Get first free point that will fit the given item
          */
-        private Point GetFirstPointThatFitsItem(InventoryItem item)
+        private Point GetFirstPointThatFitsItem(IInventoryItem item)
         {
-            for (var x = 0; x < Width - (item.Width - 1); x++)
+            for (var x = 0; x < Width - (item.Shape.Width - 1); x++)
             {
-                for (var y = 0; y < Height - (item.Height - 1); y++)
+                for (var y = 0; y < Height - (item.Shape.Height - 1); y++)
                 {
                     var p = new Point(x, y);
                     if (CanAddAt(item, p)) return p;
