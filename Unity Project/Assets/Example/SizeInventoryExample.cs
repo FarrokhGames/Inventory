@@ -22,7 +22,7 @@ namespace FarrokhGames.Inventory.Examples
             var tries = (_width * _height) / 3;
             for (var i = 0; i < tries; i++)
             {
-                inventory.Add(CreateItem(Random.Range(0, _definitions.Length)));
+                inventory.Add(_definitions[Random.Range(0, _definitions.Length)].CreateInstance());
             }
 
             // Fill empty slots with first (1x1) item
@@ -30,7 +30,7 @@ namespace FarrokhGames.Inventory.Examples
             {
                 for (var i = 0; i < _width * _height; i++)
                 {
-                    inventory.Add(CreateItem(0));
+                    inventory.Add(_definitions[0].CreateInstance());
                 }
             }
 
@@ -42,12 +42,6 @@ namespace FarrokhGames.Inventory.Examples
             {
                 Debug.Log(item.Name + " was dropped on the ground");
             };
-        }
-
-        IInventoryItem CreateItem(int index)
-        {
-            var prefab = _definitions[index];
-            return ScriptableObject.Instantiate(prefab);
         }
     }
 }

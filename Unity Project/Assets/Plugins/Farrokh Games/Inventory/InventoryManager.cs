@@ -77,7 +77,6 @@ namespace FarrokhGames.Inventory
         /// Returns true of given item is within this inventory
         /// </summary>
         /// <param name="item">Item to look for</param>
-        /// <returns></returns>
         public bool Contains(IInventoryItem item) { return _items.Contains(item); }
 
         /// <summary>

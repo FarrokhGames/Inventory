@@ -14,5 +14,13 @@ namespace FarrokhGames.Inventory.Examples
         public string Name { get { return this.name; } }
         public Sprite Sprite { get { return _sprite; } }
         public InventoryShape Shape { get { return _shape; } }
+
+        /// <summary>
+        /// Creates a copy if this scriptable object
+        /// </summary>
+        public IInventoryItem CreateInstance()
+        {
+            return ScriptableObject.Instantiate(this);
+        }
     }
 }
