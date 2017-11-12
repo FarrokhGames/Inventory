@@ -1,6 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
 using FarrokhGames.Shared;
-using System.Collections.Generic;
+using NUnit.Framework;
 using UnityEngine;
 
 namespace FarrokhGames.Inventory
@@ -203,17 +203,17 @@ namespace FarrokhGames.Inventory
         public void CanAddAt_DoesFit_ReturnsTrue()
         {
             var inventory = new InventoryManager(8, 4);
-            Assert.That(inventory.CanAddAt(CreateFullItem(1, 1), Point.one), Is.True);
-            Assert.That(inventory.CanAddAt(CreateFullItem(8, 4), Point.zero), Is.True);
-            Assert.That(inventory.CanAddAt(CreateFullItem(3, 3), Point.right), Is.True);
+            Assert.That(inventory.CanAddAt(CreateFullItem(1, 1), Vector2Int.one), Is.True);
+            Assert.That(inventory.CanAddAt(CreateFullItem(8, 4), Vector2Int.zero), Is.True);
+            Assert.That(inventory.CanAddAt(CreateFullItem(3, 3), Vector2Int.right), Is.True);
         }
 
         [Test]
         public void CanAddAt_DoesNotFit_ReturnsFalse()
         {
             var inventory = new InventoryManager(8, 4);
-            Assert.That(inventory.CanAddAt(CreateFullItem(1, 5), Point.zero), Is.False);
-            Assert.That(inventory.CanAddAt(CreateFullItem(9, 1), Point.one), Is.False);
+            Assert.That(inventory.CanAddAt(CreateFullItem(1, 5), Vector2Int.zero), Is.False);
+            Assert.That(inventory.CanAddAt(CreateFullItem(9, 1), Vector2Int.one), Is.False);
         }
 
         [Test]
@@ -221,17 +221,17 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(3, 3);
             var item1 = CreateFullItem(3, 1);
-            inventory.AddAt(item1, Point.zero);
+            inventory.AddAt(item1, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
-            Assert.That(inventory.CanAddAt(CreateFullItem(1, 1), new Point(1, 0)), Is.False);
+            Assert.That(inventory.CanAddAt(CreateFullItem(1, 1), new Vector2Int(1, 0)), Is.False);
         }
 
         [Test]
         public void CanAddAt_OutsideInventory_ReturnsFalse()
         {
             var inventory = new InventoryManager(8, 4);
-            Assert.That(inventory.CanAddAt(CreateFullItem(1, 5), new Point(-1, 1)), Is.False);
-            Assert.That(inventory.CanAddAt(CreateFullItem(9, 1), new Point(1, -1)), Is.False);
+            Assert.That(inventory.CanAddAt(CreateFullItem(1, 5), new Vector2Int(-1, 1)), Is.False);
+            Assert.That(inventory.CanAddAt(CreateFullItem(9, 1), new Vector2Int(1, -1)), Is.False);
         }
 
         [Test]
@@ -240,7 +240,7 @@ namespace FarrokhGames.Inventory
             var inventory = new InventoryManager(8, 4);
             var item = CreateFullItem(1, 1);
             inventory.Add(item);
-            Assert.That(inventory.CanAddAt(item, Point.zero), Is.False);
+            Assert.That(inventory.CanAddAt(item, Vector2Int.zero), Is.False);
         }
 
         /*
@@ -252,7 +252,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(2, 2);
             var item = CreateFullItem(3, 3);
-            inventory.AddAt(item, Point.zero);
+            inventory.AddAt(item, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(0));
         }
 
@@ -261,7 +261,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(3, 3);
             var item = CreateFullItem(3, 3);
-            inventory.AddAt(item, Point.zero);
+            inventory.AddAt(item, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
         }
 
@@ -270,10 +270,10 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(3, 3);
             var item1 = CreateFullItem(3, 1);
-            inventory.AddAt(item1, Point.zero);
+            inventory.AddAt(item1, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
             var item2 = CreateFullItem(1, 1);
-            inventory.AddAt(item2, new Point(1, 0));
+            inventory.AddAt(item2, new Vector2Int(1, 0));
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
         }
 
@@ -282,7 +282,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(3, 3);
             var item1 = CreateFullItem(3, 1);
-            inventory.AddAt(item1, new Point(-1, -1));
+            inventory.AddAt(item1, new Vector2Int(-1, -1));
             Assert.That(inventory.AllItems.Count, Is.EqualTo(0));
         }
 
@@ -292,7 +292,7 @@ namespace FarrokhGames.Inventory
             var inventory = new InventoryManager(3, 3);
             var item = CreateFullItem(1, 1);
             inventory.Add(item);
-            inventory.AddAt(item, Point.zero);
+            inventory.AddAt(item, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
         }
 
@@ -301,8 +301,8 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(3, 3);
             var item = CreateFullItem(1, 1);
-            inventory.AddAt(item, Point.one);
-            Assert.That(item.Shape.Position, Is.EqualTo(Point.one));
+            inventory.AddAt(item, Vector2Int.one);
+            Assert.That(item.Shape.Position, Is.EqualTo(Vector2Int.one));
         }
 
         [Test]
@@ -318,7 +318,7 @@ namespace FarrokhGames.Inventory
             };
 
             var item = CreateFullItem(1, 1);
-            inventory.AddAt(item, Point.zero);
+            inventory.AddAt(item, Vector2Int.zero);
 
             Assert.That(lastItem, Is.Not.Null);
             Assert.That(callbacks, Is.EqualTo(1));
@@ -330,7 +330,7 @@ namespace FarrokhGames.Inventory
             var inventory = new InventoryManager(1, 1);
             var callbacks = 0;
             inventory.OnItemAdded += (i) => { callbacks++; };
-            inventory.AddAt(CreateFullItem(2, 2), Point.zero);
+            inventory.AddAt(CreateFullItem(2, 2), Vector2Int.zero);
             Assert.That(callbacks, Is.EqualTo(0));
         }
 
@@ -543,25 +543,25 @@ namespace FarrokhGames.Inventory
             inventory.Add(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
 
-            Assert.That(inventory.GetAtPoint(new Point(0, 0)), Is.EqualTo(item1));
-            Assert.That(inventory.GetAtPoint(new Point(1, 0)), Is.EqualTo(item1));
-            Assert.That(inventory.GetAtPoint(new Point(1, 1)), Is.EqualTo(item1));
-            Assert.That(inventory.GetAtPoint(new Point(0, 1)), Is.EqualTo(item1));
+            Assert.That(inventory.GetAtPoint(new Vector2Int(0, 0)), Is.EqualTo(item1));
+            Assert.That(inventory.GetAtPoint(new Vector2Int(1, 0)), Is.EqualTo(item1));
+            Assert.That(inventory.GetAtPoint(new Vector2Int(1, 1)), Is.EqualTo(item1));
+            Assert.That(inventory.GetAtPoint(new Vector2Int(0, 1)), Is.EqualTo(item1));
 
-            Assert.That(inventory.GetAtPoint(new Point(2, 0)), Is.EqualTo(item2));
-            Assert.That(inventory.GetAtPoint(new Point(2, 1)), Is.EqualTo(item2));
+            Assert.That(inventory.GetAtPoint(new Vector2Int(2, 0)), Is.EqualTo(item2));
+            Assert.That(inventory.GetAtPoint(new Vector2Int(2, 1)), Is.EqualTo(item2));
 
-            Assert.That(inventory.GetAtPoint(new Point(0, 2)), Is.EqualTo(item3));
+            Assert.That(inventory.GetAtPoint(new Vector2Int(0, 2)), Is.EqualTo(item3));
 
-            Assert.That(inventory.GetAtPoint(new Point(2, 2)), Is.Null);
-            Assert.That(inventory.GetAtPoint(new Point(2, 3)), Is.Null);
+            Assert.That(inventory.GetAtPoint(new Vector2Int(2, 2)), Is.Null);
+            Assert.That(inventory.GetAtPoint(new Vector2Int(2, 3)), Is.Null);
         }
 
         [Test]
         public void GetAtPoint_ItemNotFoundReturnsNull()
         {
             var inventory = new InventoryManager(1, 1);
-            Assert.That(inventory.GetAtPoint(new Point(1, 1)), Is.Null);
+            Assert.That(inventory.GetAtPoint(new Vector2Int(1, 1)), Is.Null);
         }
 
         /*

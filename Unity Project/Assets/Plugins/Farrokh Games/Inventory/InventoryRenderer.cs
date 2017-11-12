@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using FarrokhGames.Shared;
 using UnityEngine;
 using UnityEngine.UI;
-using FarrokhGames.Shared;
-using System;
 
 namespace FarrokhGames.Inventory
 {
@@ -13,7 +13,7 @@ namespace FarrokhGames.Inventory
     public class InventoryRenderer : MonoBehaviour
     {
         [SerializeField, Tooltip("The size of the cells building up the inventory")]
-        private Point _cellSize = new Point(32, 32);
+        private Vector2Int _cellSize = new Vector2Int(32, 32);
 
         [SerializeField, Tooltip("The sprite to use for empty cells")]
         private Sprite _cellSpriteEmpty;
@@ -31,8 +31,8 @@ namespace FarrokhGames.Inventory
         private Dictionary<IInventoryItem, Image> _items = new Dictionary<IInventoryItem, Image>();
 
         /*
-		 * Setup
-		 */
+         * Setup
+         */
         void Awake()
         {
             RectTransform = GetComponent<RectTransform>();
@@ -261,9 +261,9 @@ namespace FarrokhGames.Inventory
         /// <param name="point">Point to select</param>
         /// <param name="blocked">Should the selection be rendered as blocked</param>
         /// <param name="color">The color of the selection</param>
-        private void Select(Point point, bool blocked, Color color)
+        private void Select(Vector2Int point, bool blocked, Color color)
         {
-            Select(new Point[] { point }, blocked, color);
+            Select(new Vector2Int[] { point }, blocked, color);
         }
 
         /// <summary>
@@ -272,7 +272,7 @@ namespace FarrokhGames.Inventory
         /// <param name="points">Points to select</param>
         /// <param name="blocked">Should the selection be rendered as blocked</param>
         /// <param name="color">The color of the selection</param>
-        private void Select(Point[] points, bool blocked, Color color)
+        private void Select(Vector2Int[] points, bool blocked, Color color)
         {
             ClearSelection();
             for (var i = 0; i < points.Length; i++)
@@ -304,8 +304,8 @@ namespace FarrokhGames.Inventory
         */
         internal Vector2 GetItemOffset(IInventoryItem item)
         {
-            var x = (-(_inventory.Width * 0.5f) + item.Shape.Position.x + ((float)item.Shape.Width * 0.5f)) * CellSize.x;
-            var y = (-(_inventory.Height * 0.5f) + item.Shape.Position.y + ((float)item.Shape.Height * 0.5f)) * CellSize.y;
+            var x = (-(_inventory.Width * 0.5f) + item.Shape.Position.x + ((float) item.Shape.Width * 0.5f)) * CellSize.x;
+            var y = (-(_inventory.Height * 0.5f) + item.Shape.Position.y + ((float) item.Shape.Height * 0.5f)) * CellSize.y;
             return new Vector2(x, y);
         }
     }

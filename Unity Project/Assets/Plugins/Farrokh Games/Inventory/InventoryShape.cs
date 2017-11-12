@@ -16,8 +16,8 @@ namespace FarrokhGames.Inventory
         [SerializeField] int _height;
         [SerializeField] bool[] _shape;
 
-        private Point _position = Point.zero;
-        private Point[] _originalPoints;
+        private Vector2Int _position = Vector2Int.zero;
+        private Vector2Int[] _originalPoints;
         private bool _haveBuiltOriginalPoints = false;
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace FarrokhGames.Inventory
         /// Constructor
         /// </summary>
         /// <param name="shape">A custom shape</param>
-        public InventoryShape(bool[,] shape)
+        public InventoryShape(bool[, ] shape)
         {
             _width = shape.GetLength(0);
             _height = shape.GetLength(1);
@@ -65,7 +65,7 @@ namespace FarrokhGames.Inventory
         /// <summary>
         /// Gets or sets the positon of this shape
         /// </summary>
-        public Point Position
+        public Vector2Int Position
         {
             get { return _position; }
             set
@@ -83,7 +83,7 @@ namespace FarrokhGames.Inventory
         /// <summary>
         /// Returns the points making up this shape, adjusted for current position
         /// </summary>
-        public Point[] Points { get; private set; }
+        public Vector2Int[] Points { get; private set; }
 
         /*
         Recalculates the rectangle and points and adjusts them by the current position)
@@ -96,12 +96,15 @@ namespace FarrokhGames.Inventory
             // Build original points (This only happens once)
             if (!_haveBuiltOriginalPoints)
             {
-                var p = new List<Point>();
+                var p = new List<Vector2Int>();
                 for (int x = 0; x < Width; x++)
                 {
                     for (int y = 0; y < Height; y++)
                     {
-                        if (_shape[GetIndex(x, y)]) { p.Add(new Point(x, y)); }
+                        if (_shape[GetIndex(x, y)])
+                        {
+                            p.Add(new Vector2Int(x, y));
+                        }
                     }
                 }
                 _originalPoints = p.ToArray();
@@ -109,7 +112,7 @@ namespace FarrokhGames.Inventory
             }
 
             // Create adjusted points
-            Points = new Point[_originalPoints.Length];
+            Points = new Vector2Int[_originalPoints.Length];
             for (int i = 0; i < _originalPoints.Length; i++)
             {
                 Points[i] = _originalPoints[i] + Position;
@@ -120,7 +123,7 @@ namespace FarrokhGames.Inventory
         /// Returns true of this item is occupying the given point
         /// </summary>
         /// <param name="point">The point to check</param>
-        public bool Contains(Point point)
+        public bool Contains(Vector2Int point)
         {
             return Points.Contains(point);
         }

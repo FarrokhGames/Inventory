@@ -90,7 +90,7 @@ namespace FarrokhGames.Inventory
                 {
                     for (var y = 0; y < Height; y++)
                     {
-                        if (GetAtPoint(new Point(x, y)) == null) { return false; }
+                        if (GetAtPoint(new Vector2Int(x, y)) == null) { return false; }
                     }
                 }
                 return true;
@@ -124,7 +124,7 @@ namespace FarrokhGames.Inventory
         /// </summary>
         /// <param name="item">Item to check</param>
         /// <param name="point">Point at which to check</param>
-        public bool CanAddAt(IInventoryItem item, Point point)
+        public bool CanAddAt(IInventoryItem item, Vector2Int point)
         {
             var previousPoint = item.Shape.Position;
             item.Shape.Position = point;
@@ -155,7 +155,7 @@ namespace FarrokhGames.Inventory
         /// </summary>
         /// <param name="item">Item to add</param>
         /// <param name="Point">Point at which to add item</param>
-        public void AddAt(IInventoryItem item, Point Point)
+        public void AddAt(IInventoryItem item, Vector2Int Point)
         {
             if (!CanAdd(item)) return;
             if (CanAddAt(item, Point))
@@ -223,7 +223,7 @@ namespace FarrokhGames.Inventory
         /// Get an item at given point within this inventory
         /// </summary>
         /// <param name="point">Point at which to look for item</param>
-        public IInventoryItem GetAtPoint(Point point)
+        public IInventoryItem GetAtPoint(Vector2Int point)
         {
             foreach (var item in _items)
             {
@@ -249,7 +249,7 @@ namespace FarrokhGames.Inventory
                 var shouldBeDropped = false;
                 for (int j = 0; j < item.Shape.Points.Length; j++)
                 {
-                    if (!_fullRect.Contains(item.Shape.Points[j].ToVector2()))
+                    if (!_fullRect.Contains(item.Shape.Points[j]))
                     {
                         shouldBeDropped = true;
                         break;
@@ -272,17 +272,17 @@ namespace FarrokhGames.Inventory
         /*
          * Get first free point that will fit the given item
          */
-        private Point GetFirstPointThatFitsItem(IInventoryItem item)
+        private Vector2Int GetFirstPointThatFitsItem(IInventoryItem item)
         {
             for (var x = 0; x < Width - (item.Shape.Width - 1); x++)
             {
                 for (var y = 0; y < Height - (item.Shape.Height - 1); y++)
                 {
-                    var p = new Point(x, y);
+                    var p = new Vector2Int(x, y);
                     if (CanAddAt(item, p)) return p;
                 }
             }
-            return new Point(-1, -1);
+            return new Vector2Int(-1, -1);
         }
     }
 }

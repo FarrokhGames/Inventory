@@ -128,14 +128,14 @@ public void Add(IInventoryItem item);
 /// </summary>
 /// <param name="item">Item to check</param>
 /// <param name="point">Point at which to check</param>
-public bool CanAddAt(IInventoryItem item, Point point);
+public bool CanAddAt(IInventoryItem item, Vector2Int point);
 
 /// <summary>
 /// Add given item at point within inventory
 /// </summary>
 /// <param name="item">Item to add</param>
 /// <param name="Point">Point at which to add item</param>
-public void AddAt(IInventoryItem item, Point Point);
+public void AddAt(IInventoryItem item, Vector2Int Point);
 
 /// <summary>
 /// Returns true if its possible to remove given item
@@ -169,7 +169,7 @@ public void Clear();
 /// Get an item at given point within this inventory
 /// </summary>
 /// <param name="point">Point at which to look for item</param>
-public IInventoryItem GetAtPoint(Point point);
+public IInventoryItem GetAtPoint(Vector2Int point);
 
 /// <summary>
 /// Resize the inventory
@@ -240,9 +240,8 @@ To enable interactions (drag and drop), add ```InventoryController.cs``` to the 
 ---
 
 ### <a id="otherfiles"></a>Other files included
-Besides the actual inventory, there are a few suppor-classes included in the reposetory.
+Besides the actual inventory, there are suppor-classes included in the reposetory.
 
-- ```Point.cs``` - Representation of 2D vectors and points using integers (Similar to Vector2 but using int's). This is used to define ```item positions and shapes```.
 - ```Pool.cs``` - A generic pool of objects that can be retrieved and recycled without invoking additional allocations. Used by the ```Renderer``` to pool sprites.
 
 **You are free to use these** support-classes under the same license, and their ```Unit Tests``` are included.
