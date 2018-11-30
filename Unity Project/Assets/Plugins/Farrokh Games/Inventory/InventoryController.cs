@@ -18,6 +18,7 @@ namespace FarrokhGames.Inventory
             // This way items can be moved between controllers easily
             private static DraggedItem _draggedItem = null;
 
+            private Canvas _canvas;
             private InventoryRenderer _renderer;
             private InventoryManager _inventory { get { return _renderer._inventory; } }
             private IInventoryItem _itemToDrag;
@@ -29,6 +30,11 @@ namespace FarrokhGames.Inventory
             {
                 _renderer = GetComponent<InventoryRenderer>();
                 if (_renderer == null) { throw new NullReferenceException("Could not find a renderer. This is not allowed!"); }
+
+                // Find the canvas
+                var canvases = GetComponentsInParent<Canvas>();
+                if (canvases.Length == 0) { throw new NullReferenceException("Could not find a canvas."); }
+                _canvas = canvases[canvases.Length - 1];
             }
 
             /*
@@ -53,12 +59,13 @@ namespace FarrokhGames.Inventory
 
                 if (_itemToDrag != null && _draggedItem == null)
                 {
-                    var t = _renderer.RectTransform.InverseTransformPoint(eventData.position);
-                    var localPosition = new Vector2(t.x, t.y);
-                    var offset = _renderer.GetItemOffset(_itemToDrag) - localPosition;
+                    var localPosition = ScreenToLocalPositionInRenderer(eventData.position);
+                    var itemOffest = _renderer.GetItemOffset(_itemToDrag);
+                    var offset = itemOffest - localPosition;
 
                     // Create a dragged item 
                     _draggedItem = new DraggedItem(
+                        _canvas,
                         this,
                         _itemToDrag.Shape.Position,
                         _itemToDrag,
@@ -124,13 +131,7 @@ namespace FarrokhGames.Inventory
              */
             private Vector2Int ScreenToGrid(Vector2 screenPoint)
             {
-                var pos = Vector2.zero;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    _renderer.RectTransform,
-                    screenPoint,
-                    null,
-                    out pos
-                );
+                var pos = ScreenToLocalPositionInRenderer(screenPoint);
                 pos.x += _renderer.RectTransform.sizeDelta.x / 2;
                 pos.y += _renderer.RectTransform.sizeDelta.y / 2;
                 return new Vector2Int(Mathf.FloorToInt(pos.x / _renderer.CellSize.x), Mathf.FloorToInt(pos.y / _renderer.CellSize.y));
@@ -144,6 +145,18 @@ namespace FarrokhGames.Inventory
                 var gx = -((item.Shape.Width * _renderer.CellSize.x) / 2f) + (_renderer.CellSize.x / 2);
                 var gy = -((item.Shape.Height * _renderer.CellSize.y) / 2f) + (_renderer.CellSize.y / 2);
                 return new Vector2(gx, gy);
+            }
+
+            private Vector2 ScreenToLocalPositionInRenderer(Vector2 screenPosition)
+            {
+                Vector2 localPosition;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    _renderer.RectTransform,
+                    screenPosition,
+                    _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera,
+                    out localPosition
+                );
+                return localPosition;
             }
 
             /// <summary>
@@ -171,8 +184,9 @@ namespace FarrokhGames.Inventory
                 /// </summary>
                 public InventoryController CurrentController;
 
+                private RectTransform _canvasTransform;
                 private Image _image;
-                Vector2 _offset;
+                private Vector2 _offset;
 
                 /// <summary>
                 /// Constructor
@@ -182,6 +196,7 @@ namespace FarrokhGames.Inventory
                 /// <param name="item">The item-instance that is being dragged</param>
                 /// <param name="offset">The starting offset of this item</param>
                 public DraggedItem(
+                    Canvas canvas,
                     InventoryController originalController,
                     Vector2Int originPoint,
                     IInventoryItem item,
@@ -191,12 +206,14 @@ namespace FarrokhGames.Inventory
                     CurrentController = OriginalController;
                     OriginPoint = originPoint;
                     Item = item;
+
+                    _canvasTransform = canvas.transform as RectTransform;;
                     _offset = offset;
 
                     // Create an image representing the dragged item
                     _image = new GameObject("DraggedItem").AddComponent<Image>();
                     _image.raycastTarget = false;
-                    _image.transform.SetParent(originalController.gameObject.GetComponentInParent<Canvas>().transform);
+                    _image.transform.SetParent(_canvasTransform);
                     _image.transform.SetAsLastSibling();
                     _image.transform.localScale = Vector3.one;
                     _image.sprite = item.Sprite;
@@ -212,7 +229,7 @@ namespace FarrokhGames.Inventory
                     set
                     {
                         // Move the image
-                        _image.rectTransform.position = value + _offset;
+                        _image.rectTransform.localPosition = (value - (_canvasTransform.sizeDelta * 0.5f)) + _offset;
 
                         // Make selections
                         if (CurrentController != null)

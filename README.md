@@ -25,7 +25,8 @@
 - ```Move items between inventories```.
 - Remove items by ```dropping``` them outside the inventory.
 - Easily add ```custom graphics``` and change the size of your inventory.
-- Tested thoroughly with over ```100 Unit Tests```, and profiled using the Unity Profiler.
+- Tested thoroughly with over ```75 Unit Tests```, and profiled using the Unity Profiler.
+- Tested using all types of ```Canvas render modes``` (Screen Space Overlay, Screen Space Camera and World Space)
 
 ---
 
@@ -37,7 +38,9 @@ Simply copy the folder "```Assets/Plugins```" into your project and you're good 
 ## <a id="example"></a>Example
 A fully functional example is included with this reposetory and can be found in the folder "```Assets/Example```". 
 
-- ```Inventory.scene``` - the Unity Scene that contains the example.
+- ```Inventory Overlay.scene``` - the Unity Scene that contains an example using the Canvas render mode of Screen Space Overlay.
+- ```Inventory Camera.scene``` - the Unity Scene that contains an example using the Canvas render mode of Screen Space Camera.
+- ```Inventory World Space.scene``` - the Unity Scene that contains an example using the Canvas render mode of World Space.
 - ```Inventory.png``` - includes all artwork used in the example.
 - ```ItemDefinition.cs``` - a ```ScriptableObject``` implemetation of ```IInventoryItem```.
 - ```SizeInventoryExample.cs``` - a ```MonoBehaviour``` that creates and connects an Inventory with a Renderer, and fills it with items.
@@ -124,6 +127,7 @@ public bool CanAdd(IInventoryItem item);
 /// <param name="item">Item to add</param>
 public void Add(IInventoryItem item);
 /// <summary>
+
 /// Returns true if its possible to add given item at given point within this inventory
 /// </summary>
 /// <param name="item">Item to check</param>
