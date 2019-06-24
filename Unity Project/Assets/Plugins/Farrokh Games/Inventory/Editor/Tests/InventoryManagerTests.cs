@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using FarrokhGames.Shared;
 using NUnit.Framework;
 using UnityEngine;
@@ -28,7 +29,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CTOR_WidthAndHeightSet()
         {
-            var inventory = new InventoryManager(16, 8);
+            var inventory = new InventoryManager(new TestProvider(), 16, 8);
             Assert.That(inventory.Width, Is.EqualTo(16));
             Assert.That(inventory.Height, Is.EqualTo(8));
         }
@@ -40,7 +41,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void AllItems_ReturnsListOfAllItems()
         {
-            var inventory = new InventoryManager(16, 8);
+            var inventory = new InventoryManager(new TestProvider(), 16, 8);
 
             var item1 = CreateFullItem(1, 1);
             inventory.Add(item1);
@@ -49,17 +50,9 @@ namespace FarrokhGames.Inventory
             inventory.Add(item2);
 
             var allItems = inventory.AllItems;
-            Assert.That(allItems.Count, Is.EqualTo(2));
+            Assert.That(allItems.Length, Is.EqualTo(2));
             Assert.That(allItems.Contains(item1), Is.True);
             Assert.That(allItems.Contains(item2), Is.True);
-        }
-
-        [Test]
-        public void AllItems_ReturnsCopy()
-        {
-            var inventory = new InventoryManager(16, 8);
-            inventory.Add(CreateFullItem(1, 1));
-            Assert.That(inventory.AllItems, Is.Not.SameAs(inventory.AllItems));
         }
 
         /*
@@ -70,7 +63,7 @@ namespace FarrokhGames.Inventory
         [TestCase(true, ExpectedResult = true)]
         public bool Contains(bool doAdd)
         {
-            var inventory = new InventoryManager(16, 8);
+            var inventory = new InventoryManager(new TestProvider(), 16, 8);
             var item1 = CreateFullItem(1, 1);
             if (doAdd) { inventory.Add(item1); }
             return inventory.Contains(item1);
@@ -83,14 +76,14 @@ namespace FarrokhGames.Inventory
         [Test]
         public void IsFull_Empty_ReturnsFalse()
         {
-            var inventory = new InventoryManager(16, 8);
+            var inventory = new InventoryManager(new TestProvider(), 16, 8);
             Assert.That(inventory.IsFull, Is.False);
         }
 
         [Test]
         public void IsFull_NotFull_ReturnsFalse()
         {
-            var inventory = new InventoryManager(4, 4);
+            var inventory = new InventoryManager(new TestProvider(), 4, 4);
             inventory.Add(CreateFullItem(2, 2));
             Assert.That(inventory.IsFull, Is.False);
         }
@@ -98,7 +91,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void IsFull_Full_ReturnsTrue()
         {
-            var inventory = new InventoryManager(2, 2);
+            var inventory = new InventoryManager(new TestProvider(), 2, 2);
             inventory.Add(CreateFullItem(2, 2));
             Assert.That(inventory.IsFull, Is.True);
         }
@@ -110,7 +103,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CanAdd_DoesFit_ReturnsTrue()
         {
-            var inventory = new InventoryManager(8, 4);
+            var inventory = new InventoryManager(new TestProvider(), 8, 4);
             Assert.That(inventory.CanAdd(CreateFullItem(1, 1)), Is.True);
             Assert.That(inventory.CanAdd(CreateFullItem(8, 4)), Is.True);
             Assert.That(inventory.CanAdd(CreateFullItem(3, 3)), Is.True);
@@ -119,7 +112,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CanAdd_DoesNotFit_ReturnsFalse()
         {
-            var inventory = new InventoryManager(8, 4);
+            var inventory = new InventoryManager(new TestProvider(), 8, 4);
             Assert.That(inventory.CanAdd(CreateFullItem(1, 5)), Is.False);
             Assert.That(inventory.CanAdd(CreateFullItem(9, 1)), Is.False);
             Assert.That(inventory.CanAdd(CreateFullItem(9, 5)), Is.False);
@@ -128,7 +121,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CanAdd_ItemAlreadyAdded_ReturnsFalse()
         {
-            var inventory = new InventoryManager(8, 4);
+            var inventory = new InventoryManager(new TestProvider(), 8, 4);
             var item = CreateFullItem(1, 1);
             inventory.Add(item);
             Assert.That(inventory.CanAdd(item), Is.False);
@@ -141,7 +134,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Add_ItemDoesNotFit_NoItemAdded()
         {
-            var inventory = new InventoryManager(2, 2);
+            var inventory = new InventoryManager(new TestProvider(), 2, 2);
             var item = CreateFullItem(3, 3);
             inventory.Add(item);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(0));
@@ -150,7 +143,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Add_ItemDoesFit_ItemAdded()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(3, 3);
             inventory.Add(item);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
@@ -159,7 +152,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Add_ItemAlreadyAdded_NoItemAdded()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(1, 1);
             inventory.Add(item);
             inventory.Add(item);
@@ -169,7 +162,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Add_ItemAdded_OnItemAddedInvoked()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var callbacks = 0;
             IInventoryItem lastItem = null;
             inventory.OnItemAdded += (i) =>
@@ -188,7 +181,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Add_ItemNotAdded_OnItemAddedNotInvoked()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var callbacks = 0;
             inventory.OnItemAdded += (i) => { callbacks++; };
             inventory.Add(CreateFullItem(2, 2));
@@ -202,7 +195,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CanAddAt_DoesFit_ReturnsTrue()
         {
-            var inventory = new InventoryManager(8, 4);
+            var inventory = new InventoryManager(new TestProvider(), 8, 4);
             Assert.That(inventory.CanAddAt(CreateFullItem(1, 1), Vector2Int.one), Is.True);
             Assert.That(inventory.CanAddAt(CreateFullItem(8, 4), Vector2Int.zero), Is.True);
             Assert.That(inventory.CanAddAt(CreateFullItem(3, 3), Vector2Int.right), Is.True);
@@ -211,7 +204,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CanAddAt_DoesNotFit_ReturnsFalse()
         {
-            var inventory = new InventoryManager(8, 4);
+            var inventory = new InventoryManager(new TestProvider(), 8, 4);
             Assert.That(inventory.CanAddAt(CreateFullItem(1, 5), Vector2Int.zero), Is.False);
             Assert.That(inventory.CanAddAt(CreateFullItem(9, 1), Vector2Int.one), Is.False);
         }
@@ -219,7 +212,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CanAddAt_ItemInTheWay_ReturnsFalse()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item1 = CreateFullItem(3, 1);
             inventory.AddAt(item1, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
@@ -229,7 +222,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CanAddAt_OutsideInventory_ReturnsFalse()
         {
-            var inventory = new InventoryManager(8, 4);
+            var inventory = new InventoryManager(new TestProvider(), 8, 4);
             Assert.That(inventory.CanAddAt(CreateFullItem(1, 5), new Vector2Int(-1, 1)), Is.False);
             Assert.That(inventory.CanAddAt(CreateFullItem(9, 1), new Vector2Int(1, -1)), Is.False);
         }
@@ -237,7 +230,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CanAddAt_ItemAlreadyAdded_ReturnsFalse()
         {
-            var inventory = new InventoryManager(8, 4);
+            var inventory = new InventoryManager(new TestProvider(), 8, 4);
             var item = CreateFullItem(1, 1);
             inventory.Add(item);
             Assert.That(inventory.CanAddAt(item, Vector2Int.zero), Is.False);
@@ -250,7 +243,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void AddAt_ItemDoesNotFit_NoItemAdded()
         {
-            var inventory = new InventoryManager(2, 2);
+            var inventory = new InventoryManager(new TestProvider(), 2, 2);
             var item = CreateFullItem(3, 3);
             inventory.AddAt(item, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(0));
@@ -259,7 +252,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void AddAt_ItemDoesFit_ItemAdded()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(3, 3);
             inventory.AddAt(item, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
@@ -268,7 +261,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void AddAt_ItemInTheWay_ItemNotAdded()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item1 = CreateFullItem(3, 1);
             inventory.AddAt(item1, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
@@ -280,7 +273,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void AddAt_OutsideInventory_ItemNotAdded()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item1 = CreateFullItem(3, 1);
             inventory.AddAt(item1, new Vector2Int(-1, -1));
             Assert.That(inventory.AllItems.Count, Is.EqualTo(0));
@@ -289,7 +282,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void AddAt_ItemAlreadyAdded_NoItemAdded()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(1, 1);
             inventory.Add(item);
             inventory.AddAt(item, Vector2Int.zero);
@@ -299,16 +292,16 @@ namespace FarrokhGames.Inventory
         [Test]
         public void AddAt_ItemAdded_ItemPositionUpdated()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(1, 1);
             inventory.AddAt(item, Vector2Int.one);
-            Assert.That(item.Shape.Position, Is.EqualTo(Vector2Int.one));
+            Assert.That(item.Position, Is.EqualTo(Vector2Int.one));
         }
 
         [Test]
         public void AddAt_ItemAdded_OnItemAddedInvoked()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var callbacks = 0;
             IInventoryItem lastItem = null;
             inventory.OnItemAdded += (i) =>
@@ -327,7 +320,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void AddAt_ItemNotAdded_OnItemAddedNotInvoked()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var callbacks = 0;
             inventory.OnItemAdded += (i) => { callbacks++; };
             inventory.AddAt(CreateFullItem(2, 2), Vector2Int.zero);
@@ -341,14 +334,14 @@ namespace FarrokhGames.Inventory
         [Test]
         public void CanRemove_ItemNotAdded_ReturnsFalse()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
             Assert.That(inventory.CanRemove(CreateFullItem(1, 1)), Is.False);
         }
 
         [Test]
         public void CanRemove_ItemAdded_ReturnsTrue()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var item = CreateFullItem(1, 1);
             inventory.Add(item);
             Assert.That(inventory.CanRemove(item), Is.True);
@@ -361,7 +354,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Remove_ItemAddedFirst_ItemRemoved()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var item = CreateFullItem(1, 1);
             inventory.Add(item);
             Assert.That(inventory.Contains(item), Is.True);
@@ -372,7 +365,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Remove_ItemNotAdded_OnItemRemovedNotInvoked()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var callbacks = 0;
             inventory.OnItemRemoved += (i) => { callbacks++; };
             inventory.Remove(CreateFullItem(1, 1));
@@ -382,7 +375,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Remove_ItemAdded_OnItemRemovedInvoked()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var callbacks = 0;
             IInventoryItem lastItem = null;
             inventory.OnItemRemoved += (i) =>
@@ -402,29 +395,26 @@ namespace FarrokhGames.Inventory
         */
 
         [Test]
-        public void Drop_ItemNotPresentInInventory_OnItemDroppedInvoked()
+        public void Drop_ItemNotPresentInInventory_OnItemDroppedNotInvoked()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
 
             var callbacks = 0;
-            IInventoryItem lastItem = null;
             inventory.OnItemDropped += (i) =>
             {
-                lastItem = i;
                 callbacks++;
             };
 
             var item = CreateFullItem(1, 1);
             inventory.Drop(item);
 
-            Assert.That(lastItem, Is.SameAs(item));
-            Assert.That(callbacks, Is.EqualTo(1));
+            Assert.That(callbacks, Is.EqualTo(0));
         }
 
         [Test]
         public void Drop_ItemPresentInInventory_ItemRemoved()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var item = CreateFullItem(1, 1);
             inventory.Add(item);
             Assert.That(inventory.Contains(item), Is.True);
@@ -435,7 +425,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Drop_ItemPresentInInventory_OnItemDroppedInvoked()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
 
             var callbacks = 0;
             IInventoryItem lastItem = null;
@@ -460,7 +450,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void DropAll_AllItemsRemoved()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item1 = CreateFullItem(1, 1);
             var item2 = CreateFullItem(1, 1);
             var item3 = CreateFullItem(1, 1);
@@ -478,7 +468,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void DropAll_OnItemDroppedInvokedForAllItems()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
 
             var droppedItems = new List<IInventoryItem>();
             inventory.OnItemDropped += (i) =>
@@ -509,22 +499,12 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Clear_AllItemsRemoved()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(3, 3);
             inventory.Add(item);
             Assert.That(inventory.Contains(item), Is.True);
             inventory.Clear();
             Assert.That(inventory.Contains(item), Is.False);
-        }
-
-        [Test]
-        public void Clear_OnClearedInvoked()
-        {
-            var inventory = new InventoryManager(3, 3);
-            var callbacks = 0;
-            inventory.OnCleared += () => { callbacks++; };
-            inventory.Clear();
-            Assert.That(callbacks, Is.EqualTo(1));
         }
 
         /*
@@ -534,7 +514,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void GetAtPoint_ItemFound_ReturnsItem()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item1 = CreateFullItem(2, 2);
             var item2 = CreateFullItem(1, 2);
             var item3 = CreateFullItem(1, 1);
@@ -560,7 +540,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void GetAtPoint_ItemNotFoundReturnsNull()
         {
-            var inventory = new InventoryManager(1, 1);
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
             Assert.That(inventory.GetAtPoint(new Vector2Int(1, 1)), Is.Null);
         }
 
@@ -571,8 +551,8 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Resize_WidthAndHeightUpdated()
         {
-            var inventory = new InventoryManager(2, 2);
-            inventory.Resize(6, 8);
+            var inventory = new InventoryManager(new TestProvider(), 2, 2);
+            inventory.SetSize(6, 8);
             Assert.That(inventory.Width, Is.EqualTo(6));
             Assert.That(inventory.Height, Is.EqualTo(8));
         }
@@ -580,17 +560,17 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Resize_OnResizedInvoked()
         {
-            var inventory = new InventoryManager(2, 2);
+            var inventory = new InventoryManager(new TestProvider(), 2, 2);
             var callbacks = 0;
             inventory.OnResized += () => { callbacks++; };
-            inventory.Resize(3, 3);
+            inventory.SetSize(3, 3);
             Assert.That(callbacks, Is.EqualTo(1));
         }
 
         [Test]
         public void Resize_AllItemFits_NoItemsRemoved()
         {
-            var inventory = new InventoryManager(2, 2);
+            var inventory = new InventoryManager(new TestProvider(), 2, 2);
             var item1 = CreateFullItem(1, 1);
             var item2 = CreateFullItem(2, 1);
             var item3 = CreateFullItem(1, 1);
@@ -598,7 +578,7 @@ namespace FarrokhGames.Inventory
             inventory.Add(item2);
             inventory.Add(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
-            inventory.Resize(3, 3);
+            inventory.SetSize(3, 3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
             Assert.That(inventory.AllItems.Contains(item1), Is.True);
             Assert.That(inventory.AllItems.Contains(item2), Is.True);
@@ -608,7 +588,7 @@ namespace FarrokhGames.Inventory
         [Test]
         public void Resize_SomeItemsNoLongerFits_ItemsRemoved()
         {
-            var inventory = new InventoryManager(3, 3);
+            var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var droppedItems = new List<IInventoryItem>();
             inventory.OnItemDropped += (i) =>
             {
@@ -621,7 +601,7 @@ namespace FarrokhGames.Inventory
             inventory.Add(item2);
             inventory.Add(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
-            inventory.Resize(2, 2);
+            inventory.SetSize(2, 2);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
             Assert.That(inventory.AllItems.Contains(item1), Is.False);
             Assert.That(inventory.AllItems.Contains(item2), Is.True);

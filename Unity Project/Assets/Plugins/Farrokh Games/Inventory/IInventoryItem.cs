@@ -4,9 +4,6 @@ namespace FarrokhGames.Inventory
 {
     public interface IInventoryItem
     {
-        string Name { get; } // TODO: REMOVE
-        InventoryShape Shape { get; } // TODO: REMOVE
-
         /// <summary>
         /// The sprite of this item
         /// </summary>
@@ -55,6 +52,22 @@ namespace FarrokhGames.Inventory
         }
 
         /// <summary>
+        /// Returns true if this item overlaps the given point within an inventory
+        /// </summary>
+        internal static bool Contains(this IInventoryItem item, Vector2Int inventoryPoint)
+        {
+            for (var iX = 0; iX < item.Width; iX++)
+            {
+                for (var iY = 0; iY < item.Height; iY++)
+                {
+                    var iPoint = item.Position + new Vector2Int(iX, iY);
+                    if (iPoint == inventoryPoint) { return true; }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Returns true of this item overlaps a given item
         /// </summary>
         internal static bool Overlaps(this IInventoryItem item, IInventoryItem otherItem)
@@ -63,13 +76,19 @@ namespace FarrokhGames.Inventory
             {
                 for (var iY = 0; iY < item.Height; iY++)
                 {
-                    var iPoint = item.Position + new Vector2Int(iX, iY);
-                    for (var oX = 0; oX < otherItem.Width; oX++)
+                    if (item.IsPartOfShape(new Vector2Int(iX, iY)))
                     {
-                        for (var oY = 0; oY < otherItem.Height; oY++)
+                        var iPoint = item.Position + new Vector2Int(iX, iY);
+                        for (var oX = 0; oX < otherItem.Width; oX++)
                         {
-                            var oPoint = otherItem.Position + new Vector2Int(oX, oY);
-                            if (oPoint == iPoint) { return true; } // Hit! Items overlap
+                            for (var oY = 0; oY < otherItem.Height; oY++)
+                            {
+                                if (otherItem.IsPartOfShape(new Vector2Int(oX, oY)))
+                                {
+                                    var oPoint = otherItem.Position + new Vector2Int(oX, oY);
+                                    if (oPoint == iPoint) { return true; } // Hit! Items overlap
+                                }
+                            }
                         }
                     }
                 }

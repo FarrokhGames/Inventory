@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FarrokhGames.Inventory.Internal;
 using FarrokhGames.Shared;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,7 +25,7 @@ namespace FarrokhGames.Inventory
         [SerializeField, Tooltip("The sprite to use for blocked cells")]
         private Sprite _cellSpriteBlocked = null;
 
-        internal IInventoryManager _inventory = null;
+        internal AbstractInventoryManager _inventory = null;
         private bool _haveListeners = false;
         private Pool<Image> _imagePool;
         private Image[] _grids = null;
@@ -60,7 +61,7 @@ namespace FarrokhGames.Inventory
         /// Set what inventory to use when rendering
         /// </summary>
         /// <param name="inventory">Inventory to use</param>
-        public void SetInventory(IInventoryManager inventory)
+        public void SetInventory(AbstractInventoryManager inventory)
         {
             if (inventory == null) { throw new ArgumentNullException("inventory"); }
             OnDisable();
@@ -89,7 +90,7 @@ namespace FarrokhGames.Inventory
                 if (_cellSpriteSelected == null) { throw new ArgumentNullException("Sprite for selected cells is null."); }
                 if (_cellSpriteBlocked == null) { throw new ArgumentNullException("Sprite for blocked cells is null."); }
 
-                _inventory.OnCleared += ReRenderAllItems;
+                _inventory.OnRebuilt += ReRenderAllItems;
                 _inventory.OnItemAdded += HandleItemAdded;
                 _inventory.OnItemRemoved += HandleItemRemoved;
                 _inventory.OnItemDropped += HandleItemRemoved;
@@ -109,7 +110,7 @@ namespace FarrokhGames.Inventory
         {
             if (_inventory != null && _haveListeners)
             {
-                _inventory.OnCleared -= ReRenderAllItems;
+                _inventory.OnRebuilt -= ReRenderAllItems;
                 _inventory.OnItemAdded -= HandleItemAdded;
                 _inventory.OnItemRemoved -= HandleItemRemoved;
                 _inventory.OnItemDropped -= HandleItemRemoved;
@@ -178,7 +179,7 @@ namespace FarrokhGames.Inventory
             _items.Clear();
 
             // Add all items
-            foreach (var item in _inventory.GetAllItems())
+            foreach (var item in _inventory.AllItems)
             {
                 HandleItemAdded(item);
             }
@@ -190,7 +191,7 @@ namespace FarrokhGames.Inventory
         private void HandleItemAdded(IInventoryItem item)
         {
             var img = CreateImage(item.Sprite, false);
-            img.gameObject.name = item.Name;
+            //img.gameObject.name = item.Name;
             img.rectTransform.localPosition = GetItemOffset(item);
             _items.Add(item, img);
         }
@@ -252,37 +253,21 @@ namespace FarrokhGames.Inventory
         public void SelectItem(IInventoryItem item, bool blocked, Color color)
         {
             if (item == null) { return; }
-            Select(item.Shape.Points, blocked, color);
-        }
-
-        /// <summary>
-        /// Selects a single point in the inventory
-        /// </summary>
-        /// <param name="point">Point to select</param>
-        /// <param name="blocked">Should the selection be rendered as blocked</param>
-        /// <param name="color">The color of the selection</param>
-        private void Select(Vector2Int point, bool blocked, Color color)
-        {
-            Select(new Vector2Int[] { point }, blocked, color);
-        }
-
-        /// <summary>
-        /// Selects given points in this inventory
-        /// </summary>
-        /// <param name="points">Points to select</param>
-        /// <param name="blocked">Should the selection be rendered as blocked</param>
-        /// <param name="color">The color of the selection</param>
-        private void Select(Vector2Int[] points, bool blocked, Color color)
-        {
             ClearSelection();
-            for (var i = 0; i < points.Length; i++)
+            for (var x = 0; x < item.Width; x++)
             {
-                var p = points[i];
-                if (p.x >= 0 && p.x < _inventory.Width && p.y >= 0 && p.y < _inventory.Height)
+                for (var y = 0; y < item.Height; y++)
                 {
-                    var index = p.y * _inventory.Width + ((_inventory.Width - 1) - p.x);
-                    _grids[index].sprite = blocked ? _cellSpriteBlocked : _cellSpriteSelected;
-                    _grids[index].color = color;
+                    if (item.IsPartOfShape(new Vector2Int(x, y)))
+                    {
+                        var p = item.Position + new Vector2Int(x, y);
+                        if (p.x >= 0 && p.x < _inventory.Width && p.y >= 0 && p.y < _inventory.Height)
+                        {
+                            var index = p.y * _inventory.Width + ((_inventory.Width - 1) - p.x);
+                            _grids[index].sprite = blocked ? _cellSpriteBlocked : _cellSpriteSelected;
+                            _grids[index].color = color;
+                        }
+                    }
                 }
             }
         }
@@ -304,8 +289,8 @@ namespace FarrokhGames.Inventory
         */
         internal Vector2 GetItemOffset(IInventoryItem item)
         {
-            var x = (-(_inventory.Width * 0.5f) + item.Shape.Position.x + ((float)item.Shape.Width * 0.5f)) * CellSize.x;
-            var y = (-(_inventory.Height * 0.5f) + item.Shape.Position.y + ((float)item.Shape.Height * 0.5f)) * CellSize.y;
+            var x = (-(_inventory.Width * 0.5f) + item.Position.x + ((float)item.Width * 0.5f)) * CellSize.x;
+            var y = (-(_inventory.Height * 0.5f) + item.Position.y + ((float)item.Height * 0.5f)) * CellSize.y;
             return new Vector2(x, y);
         }
     }

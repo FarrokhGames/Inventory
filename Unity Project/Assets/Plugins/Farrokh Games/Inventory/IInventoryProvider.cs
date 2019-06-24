@@ -8,12 +8,6 @@ namespace FarrokhGames.Inventory
     public interface IInventoryProvider
     {
         /// <summary>
-        /// Invoked when something in the inventory changes 
-        /// (items added, removed, etc.)
-        /// </summary>
-        Action OnInventoryChanged { get; set; }
-
-        /// <summary>
         /// Returns the total amount of inventory items in 
         /// this inventory
         /// </summary>
@@ -28,7 +22,19 @@ namespace FarrokhGames.Inventory
         /// Returns true if given inventory item is allowed inside 
         /// this inventory
         /// </summary>
-        bool IsInventoryItemAllowed(IInventoryItem item);
+        bool CanAddInventoryItem(IInventoryItem item);
+
+        /// <summary>
+        /// Returns true if given inventory item is allowed to 
+        /// be removed from this inventory
+        /// </summary>
+        bool CanRemoveInventoryItem(IInventoryItem item);
+
+        /// <summary>
+        /// Returns true if given inventory item is allowed to 
+        /// be dropped on the ground
+        /// </summary>
+        bool CanDropInventoryItem(IInventoryItem item);
 
         /// <summary>
         /// Invoked when an inventory item is added to the 

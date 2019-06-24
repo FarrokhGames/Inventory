@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FarrokhGames.Inventory
 {
-    public interface IInventoryManager
+    public interface IInventoryManager : IDisposable
     {
         /// <summary>
         /// Invoked when an item is added to the inventory
@@ -21,35 +21,10 @@ namespace FarrokhGames.Inventory
         Action<IInventoryItem> OnItemDropped { get; set; }
 
         /// <summary>
-        /// Invoked when the inventory is cleared.
+        /// Invoked when the inventory is rebuilt from scratch
         /// </summary>
-        Action OnCleared { get; set; }
+        Action OnRebuilt { get; set; }
 
-        /// <summary>
-        /// Invoked when the inventory is resized.
-        /// </summary>
-        Action OnResized { get; set; }
-
-        /// <summary>
-        /// Returns the width of this inventory
-        /// </summary>
-        int Width { get; }
-
-        /// <summary>
-        /// Returns the height of this inventory
-        /// </summary>
-        int Height { get; }
-
-        /// <summary>
-        /// Returns an array containing all items within 
-        /// this inventory
-        /// </summary>
-        IInventoryItem[] GetAllItems();
-
-        /// <summary>
-        /// Returns true of given item is within this 
-        /// inventory
-        /// </summary>
         bool Contains(IInventoryItem item);
 
         /// <summary>
@@ -68,21 +43,6 @@ namespace FarrokhGames.Inventory
         /// </summary>
         bool Add(IInventoryItem item);
 
-        /// <summary>
-        /// Returns true if its possible to add given item at 
-        /// given point within this inventory
-        /// </summary>
-        bool CanAddAt(IInventoryItem item, Vector2Int point);
-
-        /// <summary>
-        /// Add given item at point within inventory. Returns 
-        /// true if successful
-        /// </summary>
-        bool AddAt(IInventoryItem item, Vector2Int point);
-
-        /// <summary>
-        /// Returns true if its possible to remove given item
-        /// </summary>
         bool CanRemove(IInventoryItem item);
 
         /// <summary>
@@ -91,10 +51,6 @@ namespace FarrokhGames.Inventory
         /// </summary>
         bool Remove(IInventoryItem item);
 
-        /// <summary>
-        /// Returns true if given item can be dropped from 
-        /// this inventory
-        /// </summary>
         bool CanDrop(IInventoryItem item);
 
         /// <summary>
@@ -112,6 +68,8 @@ namespace FarrokhGames.Inventory
         /// Clears (destroys) all items in this inventory
         /// </summary>
         void Clear();
+
+        void Rebuild();
 
         /// <summary>
         /// Get an item at given point within this inventory

@@ -15,8 +15,10 @@ namespace FarrokhGames.Inventory.Examples
 
         void Start()
         {
+            var provider = new InventoryProvider();
+
             // Create inventory
-            var inventory = new InventoryManager(_width, _height);
+            var inventory = new InventoryManager(provider, _width, _height);
 
             // Fill inventory with random items
             var tries = (_width * _height) / 3;

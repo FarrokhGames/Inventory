@@ -1,4 +1,5 @@
 using System;
+using FarrokhGames.Inventory.Internal;
 using FarrokhGames.Shared;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,7 +21,7 @@ namespace FarrokhGames.Inventory
 
             private Canvas _canvas;
             private InventoryRenderer _renderer;
-            private IInventoryManager _inventory { get { return _renderer._inventory; } }
+            private AbstractInventoryManager _inventory { get { return _renderer._inventory; } }
             private IInventoryItem _itemToDrag;
 
             /*
@@ -67,7 +68,7 @@ namespace FarrokhGames.Inventory
                     _draggedItem = new DraggedItem(
                         _canvas,
                         this,
-                        _itemToDrag.Shape.Position,
+                        _itemToDrag.Position,
                         _itemToDrag,
                         offset
                     );
@@ -142,8 +143,8 @@ namespace FarrokhGames.Inventory
              */
             private Vector2 GetDraggedItemOffset(IInventoryItem item)
             {
-                var gx = -((item.Shape.Width * _renderer.CellSize.x) / 2f) + (_renderer.CellSize.x / 2);
-                var gy = -((item.Shape.Height * _renderer.CellSize.y) / 2f) + (_renderer.CellSize.y / 2);
+                var gx = -((item.Width * _renderer.CellSize.x) / 2f) + (_renderer.CellSize.x / 2);
+                var gy = -((item.Height * _renderer.CellSize.y) / 2f) + (_renderer.CellSize.y / 2);
                 return new Vector2(gx, gy);
             }
 
@@ -234,8 +235,8 @@ namespace FarrokhGames.Inventory
                         // Make selections
                         if (CurrentController != null)
                         {
-                            _draggedItem.Item.Shape.Position = CurrentController.ScreenToGrid(value + _offset + CurrentController.GetDraggedItemOffset(_draggedItem.Item));
-                            var canAdd = CurrentController._inventory.CanAddAt(_draggedItem.Item, _draggedItem.Item.Shape.Position);
+                            _draggedItem.Item.Position = CurrentController.ScreenToGrid(value + _offset + CurrentController.GetDraggedItemOffset(_draggedItem.Item));
+                            var canAdd = CurrentController._inventory.CanAddAt(_draggedItem.Item, _draggedItem.Item.Position);
                             CurrentController._renderer.SelectItem(_draggedItem.Item, !canAdd, Color.white);
                         }
 
