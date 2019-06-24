@@ -148,6 +148,21 @@ namespace FarrokhGames.Inventory
             return false; // Items does not overlap
         }
 
+        /// <summary>
+        /// Returns true if given local point is part of this shape
+        /// </summary>
+        /// <param name="point">The point to check</param>
+        public bool IsPartOfShape(Vector2Int localPoint)
+        {
+            if (localPoint.x < 0 || localPoint.x >= _width || localPoint.y < 0 || localPoint.y >= _height)
+            {
+                return false; // outside of shape width/height
+            }
+
+            var index = GetIndex(localPoint.x, localPoint.y);
+            return _shape[index];
+        }
+
         /*
         Converts X & Y to an index to use with _shape
         */

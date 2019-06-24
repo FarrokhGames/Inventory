@@ -40,7 +40,7 @@ namespace FarrokhGames.Inventory.Examples
             // Log items being dropped on the ground
             inventory.OnItemDropped += (item) =>
             {
-                Debug.Log(item.Name + " was dropped on the ground");
+                Debug.Log((item as ItemDefinition).Name + " was dropped on the ground");
             };
         }
     }

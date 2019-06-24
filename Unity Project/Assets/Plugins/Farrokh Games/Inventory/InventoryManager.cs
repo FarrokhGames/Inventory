@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FarrokhGames.Shared;
 using UnityEngine;
 
 namespace FarrokhGames.Inventory
@@ -8,41 +7,37 @@ namespace FarrokhGames.Inventory
     /// <summary>
     /// Inventory Class
     /// </summary>
-    public class InventoryManager
+    public class InventoryManager : IInventoryManager
     {
         /// <summary>
         /// Invoked when an item is added to the inventory
         /// </summary>
-        public Action<IInventoryItem> OnItemAdded;
+        public Action<IInventoryItem> OnItemAdded { get; set; }
 
         /// <summary>
         /// Invoked when an item is removed to the inventory
         /// </summary>
-        public Action<IInventoryItem> OnItemRemoved;
+        public Action<IInventoryItem> OnItemRemoved { get; set; }
 
         /// <summary>
         /// Invoked when an item is removed from the inventory and should be placed on the ground.
         /// </summary>
-        public Action<IInventoryItem> OnItemDropped;
+        public Action<IInventoryItem> OnItemDropped { get; set; }
 
         /// <summary>
         /// Invoked when the inventory is cleared.
         /// </summary>
-        public Action OnCleared;
+        public Action OnCleared { get; set; }
 
         /// <summary>
         /// Invoked when the inventory is resized.
         /// </summary>
-        public Action OnResized;
+        public Action OnResized { get; set; }
 
-        /// <summary>
-        /// Returns the width of this inventory
-        /// </summary>
+        /// <inheritdoc />
         public int Width { get; private set; }
 
-        /// <summary>
-        /// Returns the height of this inventory
-        /// </summary>
+        /// <inheritdoc />
         public int Height { get; private set; }
 
         private List<IInventoryItem> _items = new List<IInventoryItem>();
@@ -73,15 +68,16 @@ namespace FarrokhGames.Inventory
         /// </summary>
         public List<IInventoryItem> AllItems { get { return new List<IInventoryItem>(_items); } }
 
-        /// <summary>
-        /// Returns true of given item is within this inventory
-        /// </summary>
-        /// <param name="item">Item to look for</param>
+        /// <inheritdoc />
+        public IInventoryItem[] GetAllItems()
+        {
+            return _items.ToArray();
+        }
+
+        /// <inheritdoc />
         public bool Contains(IInventoryItem item) { return _items.Contains(item); }
 
-        /// <summary>
-        /// Returns true if this inventory is full
-        /// </summary>
+        /// <inheritdoc />
         public bool IsFull
         {
             get
@@ -97,33 +93,23 @@ namespace FarrokhGames.Inventory
             }
         }
 
-        /// <summary>
-        /// Returns true if its possible to add given item.
-        /// </summary>
-        /// <param name="item">Item to check</param>
+        /// <inheritdoc />
         public bool CanAdd(IInventoryItem item)
         {
-            if (_items.Contains(item)) return false;
+            if (_items.Contains(item))return false;
             return GetFirstPointThatFitsItem(item).x != -1;
         }
 
-        /// <summary>
-        /// Add given item to the inventory
-        /// </summary>
-        /// <param name="item">Item to add</param>
-        public void Add(IInventoryItem item)
+        /// <inheritdoc />
+        public bool Add(IInventoryItem item)
         {
-            if (!CanAdd(item)) return;
+            if (!CanAdd(item))return false;
             var freePoint = GetFirstPointThatFitsItem(item);
-            if (freePoint.x == -1) return;
-            AddAt(item, freePoint);
+            if (freePoint.x == -1)return false;
+            return AddAt(item, freePoint);
         }
 
-        /// <summary>
-        /// Returns true if its possible to add given item at given point within this inventory
-        /// </summary>
-        /// <param name="item">Item to check</param>
-        /// <param name="point">Point at which to check</param>
+        /// <inheritdoc />
         public bool CanAddAt(IInventoryItem item, Vector2Int point)
         {
             var previousPoint = item.Shape.Position;
@@ -150,57 +136,53 @@ namespace FarrokhGames.Inventory
             return true; // Item can be added
         }
 
-        /// <summary>
-        /// Add given item at point within inventory
-        /// </summary>
-        /// <param name="item">Item to add</param>
-        /// <param name="Point">Point at which to add item</param>
-        public void AddAt(IInventoryItem item, Vector2Int Point)
+        /// <inheritdoc />
+        public bool AddAt(IInventoryItem item, Vector2Int Point)
         {
-            if (!CanAdd(item)) return;
+            if (!CanAdd(item))return false;
             if (CanAddAt(item, Point))
             {
                 _items.Add(item);
                 item.Shape.Position = Point;
                 if (OnItemAdded != null) { OnItemAdded(item); }
             }
+
+            return false; // TODO:
         }
 
-        /// <summary>
-        /// Returns true if its possible to remove given item
-        /// </summary>
-        /// <param name="item">Item to check</param>
+        /// <inheritdoc />
         public bool CanRemove(IInventoryItem item)
         {
             return Contains(item);
         }
 
-        /// <summary>
-        /// Removes given item from this inventory
-        /// </summary>
-        /// <param name="item">Item to remove</param>
-        public void Remove(IInventoryItem item)
+        /// <inheritdoc />
+        public bool Remove(IInventoryItem item)
         {
             if (CanRemove(item))
             {
                 _items.Remove(item);
                 if (OnItemRemoved != null) { OnItemRemoved(item); }
             }
+
+            return false; // TODO:
         }
 
-        /// <summary>
-        /// Removes an item from this inventory and invokes OnItemDropped
-        /// </summary>
-        /// <param name="item"></param>
-        public void Drop(IInventoryItem item)
+        /// <inheritdoc />
+        public bool CanDrop(IInventoryItem item)
+        {
+            return CanRemove(item);
+        }
+
+        /// <inheritdoc />
+        public bool Drop(IInventoryItem item)
         {
             Remove(item);
             if (OnItemDropped != null) { OnItemDropped(item); }
+            return false; // TODO:
         }
 
-        /// <summary>
-        /// Drops all items in this inventory
-        /// </summary>
+        /// <inheritdoc />
         public void DropAll()
         {
             var itemsToDrop = _items.ToArray();
@@ -210,9 +192,7 @@ namespace FarrokhGames.Inventory
             }
         }
 
-        /// <summary>
-        /// Clears (destroys) all items in this inventory
-        /// </summary>
+        /// <inheritdoc />
         public void Clear()
         {
             _items.Clear();
@@ -279,7 +259,7 @@ namespace FarrokhGames.Inventory
                 for (var y = 0; y < Height - (item.Shape.Height - 1); y++)
                 {
                     var p = new Vector2Int(x, y);
-                    if (CanAddAt(item, p)) return p;
+                    if (CanAddAt(item, p))return p;
                 }
             }
             return new Vector2Int(-1, -1);

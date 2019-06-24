@@ -20,7 +20,7 @@ namespace FarrokhGames.Inventory
 
             private Canvas _canvas;
             private InventoryRenderer _renderer;
-            private InventoryManager _inventory { get { return _renderer._inventory; } }
+            private IInventoryManager _inventory { get { return _renderer._inventory; } }
             private IInventoryItem _itemToDrag;
 
             /*
