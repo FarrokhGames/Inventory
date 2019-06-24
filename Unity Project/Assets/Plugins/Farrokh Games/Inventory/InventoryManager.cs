@@ -9,7 +9,6 @@ namespace FarrokhGames.Inventory
     /// </summary>
     public class InventoryManager : AbstractInventoryManager
     {
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -49,9 +48,8 @@ namespace FarrokhGames.Inventory
         /// <inheritdoc />
         public override bool CanAdd(IInventoryItem item)
         {
-            if (AllItems.Contains(item))return false;
             Vector2Int point;
-            if (GetFirstPointThatFitsItem(item, out point))
+            if (!Contains(item) && GetFirstPointThatFitsItem(item, out point))
             {
                 return CanAddAt(item, point);
             }
@@ -73,6 +71,8 @@ namespace FarrokhGames.Inventory
         /// <inheritdoc />
         public override bool CanAddAt(IInventoryItem item, Vector2Int point)
         {
+            if (!base.CanAddAt(item, point))return false;
+
             var previousPoint = item.Position;
             item.Position = point;
             var padding = Vector2.one * 0.01f;

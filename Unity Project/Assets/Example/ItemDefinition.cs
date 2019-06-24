@@ -10,6 +10,7 @@ namespace FarrokhGames.Inventory.Examples
     {
         [SerializeField] private Sprite _sprite = null;
         [SerializeField] private InventoryShape _shape = null;
+        [SerializeField] private ItemType _type = ItemType.Utility;
         [SerializeField, HideInInspector] private Vector2Int _position = Vector2Int.zero;
 
         /// <summary>
@@ -17,7 +18,10 @@ namespace FarrokhGames.Inventory.Examples
         /// </summary>
         public string Name { get { return this.name; } }
 
-        public InventoryShape Shape { get { return _shape; } } // TODO: REMOVE
+        /// <summary>
+        /// The type of the item
+        /// </summary>
+        public ItemType Type { get { return _type; } }
 
         /// <inheritdoc />
         public Sprite Sprite { get { return _sprite; } }

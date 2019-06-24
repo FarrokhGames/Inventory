@@ -112,7 +112,7 @@ namespace FarrokhGames.Inventory.Internal
 
         public virtual bool CanAddAt(IInventoryItem item, Vector2Int point)
         {
-            return _provider.CanAddInventoryItem(item);
+            return !_provider.IsInventoryFull && _provider.CanAddInventoryItem(item);
         }
 
         public virtual bool AddAt(IInventoryItem item, Vector2Int Point)

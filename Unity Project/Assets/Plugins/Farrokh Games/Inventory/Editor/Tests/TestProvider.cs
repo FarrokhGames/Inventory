@@ -5,8 +5,29 @@ namespace FarrokhGames.Inventory
     public class TestProvider : IInventoryProvider
     {
         private List<IInventoryItem> _items = new List<IInventoryItem>();
+        private int _maximumAlowedItemCount;
+
+        /// <summary>
+        /// CTOR
+        /// </summary>
+        public TestProvider(InventoryRenderMode renderMode = InventoryRenderMode.Grid, int maximumAlowedItemCount = -1)
+        {
+            InventoryRenderMode = renderMode;
+            _maximumAlowedItemCount = maximumAlowedItemCount;
+        }
 
         public int InventoryItemCount { get { return _items.Count; } }
+
+        public InventoryRenderMode InventoryRenderMode { get; private set; }
+
+        public bool IsInventoryFull
+        {
+            get
+            {
+                if (_maximumAlowedItemCount < 0)return false;
+                return InventoryItemCount < _maximumAlowedItemCount;
+            }
+        }
 
         public bool AddInventoryItem(IInventoryItem item)
         {
@@ -20,6 +41,7 @@ namespace FarrokhGames.Inventory
 
         public bool DropInventoryItem(IInventoryItem item)
         {
+            UnityEngine.Debug.Log("Item dropped");
             return RemoveInventoryItem(item);
         }
 

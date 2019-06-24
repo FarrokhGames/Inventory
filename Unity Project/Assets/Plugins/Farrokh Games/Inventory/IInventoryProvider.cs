@@ -8,10 +8,20 @@ namespace FarrokhGames.Inventory
     public interface IInventoryProvider
     {
         /// <summary>
+        /// Returns the render mode of this inventory
+        /// </summary>
+        InventoryRenderMode InventoryRenderMode { get; }
+
+        /// <summary>
         /// Returns the total amount of inventory items in 
         /// this inventory
         /// </summary>
         int InventoryItemCount { get; }
+
+        /// <summary>
+        /// Returns true if the inventory is full
+        /// </summary>
+        bool IsInventoryFull { get; }
 
         /// <summary>
         /// Returns the inventory item at given index
