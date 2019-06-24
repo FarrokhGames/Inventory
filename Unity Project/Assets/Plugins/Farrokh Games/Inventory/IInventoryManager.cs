@@ -25,6 +25,16 @@ namespace FarrokhGames.Inventory
         /// </summary>
         Action OnRebuilt { get; set; }
 
+        Action OnResized { get; set; }
+
+        int Width { get; }
+
+        int Height { get; }
+
+        void Resize(int width, int height);
+
+        IInventoryItem[] AllItems { get; }
+
         bool Contains(IInventoryItem item);
 
         /// <summary>
@@ -42,6 +52,10 @@ namespace FarrokhGames.Inventory
         /// if successful
         /// </summary>
         bool Add(IInventoryItem item);
+
+        bool CanAddAt(IInventoryItem item, Vector2Int point);
+
+        bool AddAt(IInventoryItem item, Vector2Int Point);
 
         bool CanRemove(IInventoryItem item);
 

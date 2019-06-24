@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FarrokhGames.Inventory.Internal;
 using FarrokhGames.Shared;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,7 +24,8 @@ namespace FarrokhGames.Inventory
         [SerializeField, Tooltip("The sprite to use for blocked cells")]
         private Sprite _cellSpriteBlocked = null;
 
-        internal AbstractInventoryManager _inventory = null;
+        internal IInventoryManager _inventory = null;
+        InventoryRenderMode _renderMode;
         private bool _haveListeners = false;
         private Pool<Image> _imagePool;
         private Image[] _grids = null;
@@ -61,11 +61,12 @@ namespace FarrokhGames.Inventory
         /// Set what inventory to use when rendering
         /// </summary>
         /// <param name="inventory">Inventory to use</param>
-        public void SetInventory(AbstractInventoryManager inventory)
+        public void SetInventory(IInventoryManager inventory, InventoryRenderMode renderMode)
         {
             if (inventory == null) { throw new ArgumentNullException("inventory"); }
             OnDisable();
             _inventory = inventory;
+            _renderMode = renderMode;
             OnEnable();
         }
 
@@ -192,7 +193,16 @@ namespace FarrokhGames.Inventory
         {
             var img = CreateImage(item.Sprite, false);
             //img.gameObject.name = item.Name;
-            img.rectTransform.localPosition = GetItemOffset(item);
+
+            if (_renderMode == InventoryRenderMode.Single)
+            {
+                img.rectTransform.localPosition = RectTransform.rect.center;
+            }
+            else
+            {
+                img.rectTransform.localPosition = GetItemOffset(item);
+            }
+
             _items.Add(item, img);
         }
 

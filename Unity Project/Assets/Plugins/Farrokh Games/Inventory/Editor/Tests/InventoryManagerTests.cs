@@ -552,7 +552,7 @@ namespace FarrokhGames.Inventory
         public void Resize_WidthAndHeightUpdated()
         {
             var inventory = new InventoryManager(new TestProvider(), 2, 2);
-            inventory.SetSize(6, 8);
+            inventory.Resize(6, 8);
             Assert.That(inventory.Width, Is.EqualTo(6));
             Assert.That(inventory.Height, Is.EqualTo(8));
         }
@@ -563,7 +563,7 @@ namespace FarrokhGames.Inventory
             var inventory = new InventoryManager(new TestProvider(), 2, 2);
             var callbacks = 0;
             inventory.OnResized += () => { callbacks++; };
-            inventory.SetSize(3, 3);
+            inventory.Resize(3, 3);
             Assert.That(callbacks, Is.EqualTo(1));
         }
 
@@ -578,7 +578,7 @@ namespace FarrokhGames.Inventory
             inventory.Add(item2);
             inventory.Add(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
-            inventory.SetSize(3, 3);
+            inventory.Resize(3, 3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
             Assert.That(inventory.AllItems.Contains(item1), Is.True);
             Assert.That(inventory.AllItems.Contains(item2), Is.True);
@@ -601,7 +601,7 @@ namespace FarrokhGames.Inventory
             inventory.Add(item2);
             inventory.Add(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
-            inventory.SetSize(2, 2);
+            inventory.Resize(2, 2);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
             Assert.That(inventory.AllItems.Contains(item1), Is.False);
             Assert.That(inventory.AllItems.Contains(item2), Is.True);

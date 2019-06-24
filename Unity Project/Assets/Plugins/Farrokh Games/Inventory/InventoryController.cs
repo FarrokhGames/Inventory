@@ -1,5 +1,4 @@
 using System;
-using FarrokhGames.Inventory.Internal;
 using FarrokhGames.Shared;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -21,7 +20,7 @@ namespace FarrokhGames.Inventory
 
             private Canvas _canvas;
             private InventoryRenderer _renderer;
-            private AbstractInventoryManager _inventory { get { return _renderer._inventory; } }
+            private IInventoryManager _inventory { get { return _renderer._inventory; } }
             private IInventoryItem _itemToDrag;
 
             /*
