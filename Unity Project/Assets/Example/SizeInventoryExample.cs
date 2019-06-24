@@ -10,7 +10,7 @@ namespace FarrokhGames.Inventory.Examples
     {
         [SerializeField] private int _width = 8;
         [SerializeField] private int _height = 4;
-        [SerializeField] private ItemDefinition[] _definitions;
+        [SerializeField] private ItemDefinition[] _definitions = null;
         [SerializeField] private bool _fillEmpty = false; // Should the inventory get completely filled?
 
         void Start()

@@ -16,13 +16,13 @@ namespace FarrokhGames.Inventory
         private Vector2Int _cellSize = new Vector2Int(32, 32);
 
         [SerializeField, Tooltip("The sprite to use for empty cells")]
-        private Sprite _cellSpriteEmpty;
+        private Sprite _cellSpriteEmpty = null;
 
         [SerializeField, Tooltip("The sprite to use for selected cells")]
-        private Sprite _cellSpriteSelected;
+        private Sprite _cellSpriteSelected = null;
 
         [SerializeField, Tooltip("The sprite to use for blocked cells")]
-        private Sprite _cellSpriteBlocked;
+        private Sprite _cellSpriteBlocked = null;
 
         internal InventoryManager _inventory = null;
         private bool _haveListeners = false;
@@ -304,8 +304,8 @@ namespace FarrokhGames.Inventory
         */
         internal Vector2 GetItemOffset(IInventoryItem item)
         {
-            var x = (-(_inventory.Width * 0.5f) + item.Shape.Position.x + ((float) item.Shape.Width * 0.5f)) * CellSize.x;
-            var y = (-(_inventory.Height * 0.5f) + item.Shape.Position.y + ((float) item.Shape.Height * 0.5f)) * CellSize.y;
+            var x = (-(_inventory.Width * 0.5f) + item.Shape.Position.x + ((float)item.Shape.Width * 0.5f)) * CellSize.x;
+            var y = (-(_inventory.Height * 0.5f) + item.Shape.Position.y + ((float)item.Shape.Height * 0.5f)) * CellSize.y;
             return new Vector2(x, y);
         }
     }
