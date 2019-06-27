@@ -15,7 +15,6 @@ namespace FarrokhGames.Inventory.Examples
 
             var allControllers = GameObject.FindObjectsOfType<InventoryController>();
 
-            UnityEngine.Debug.Log("Found " + allControllers.Length + " controllers");
             foreach (var controller in allControllers)
             {
                 controller.OnItemHovered += HandleItemHover;
