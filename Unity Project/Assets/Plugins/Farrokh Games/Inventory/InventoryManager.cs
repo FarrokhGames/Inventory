@@ -157,7 +157,18 @@ namespace FarrokhGames.Inventory
 
         public virtual bool CanAddAt(IInventoryItem item, Vector2Int point)
         {
-            if (_provider.IsInventoryFull || !_provider.CanAddInventoryItem(item))return false;
+            if (!_provider.CanAddInventoryItem(item))
+            {
+                return false;
+            }
+            else if (_provider.InventoryRenderMode == InventoryRenderMode.Single)
+            {
+                return true;
+            }
+            else if (_provider.IsInventoryFull)
+            {
+                return false;
+            }
 
             var previousPoint = item.Position;
             item.Position = point;
@@ -190,8 +201,15 @@ namespace FarrokhGames.Inventory
                 var sucess = _provider.AddInventoryItem(item);
                 if (sucess)
                 {
-                    // TODO: If render mode is single, figure out whats the most center point and use that!
-                    item.Position = Point;
+                    switch (_provider.InventoryRenderMode)
+                    {
+                        case InventoryRenderMode.Single:
+                            item.Position = GetCenterPosition(item);
+                            break;
+                        default:
+                            item.Position = Point;
+                            break;
+                    }
                     Rebuild(true);
                     if (OnItemAdded != null)OnItemAdded(item);
                 }
@@ -271,6 +289,15 @@ namespace FarrokhGames.Inventory
             }
             point = Vector2Int.zero;
             return false;
+        }
+
+        private Vector2Int GetCenterPosition(IInventoryItem item)
+        {
+            return new Vector2Int(
+                (_size.x - item.Width) / 2,
+                (_size.y - item.Height) / 2
+            );
+
         }
     }
 }
