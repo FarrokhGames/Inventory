@@ -73,7 +73,7 @@ namespace FarrokhGames.Inventory
                     );
 
                     // Remove the item from inventory
-                    _inventory.Remove(_itemToDrag);
+                    _inventory.TryRemove(_itemToDrag);
                 }
             }
 
@@ -235,7 +235,7 @@ namespace FarrokhGames.Inventory
                         if (CurrentController != null)
                         {
                             _draggedItem.Item.Position = CurrentController.ScreenToGrid(value + _offset + CurrentController.GetDraggedItemOffset(_draggedItem.Item));
-                            var canAdd = CurrentController._inventory.CanAddAt(_draggedItem.Item, _draggedItem.Item.Position);
+                            var canAdd = CurrentController._inventory.CanAddAt(_draggedItem.Item, _draggedItem.Item.Position) || CanSwap();
                             CurrentController._renderer.SelectItem(_draggedItem.Item, !canAdd, Color.white);
                         }
 
@@ -253,23 +253,55 @@ namespace FarrokhGames.Inventory
                     if (CurrentController != null)
                     {
                         var grid = CurrentController.ScreenToGrid(position + _offset + CurrentController.GetDraggedItemOffset(Item));
+                        var success = false;
+
+                        // Try to add new item
                         if (CurrentController._inventory.CanAddAt(Item, grid))
                         {
-                            CurrentController._inventory.AddAt(Item, grid); // Place the item in a new location
+                            CurrentController._inventory.TryAddAt(Item, grid); // Place the item in a new location
+                            success = true;
                         }
-                        else
+                        // Adding did not work, try to swap
+                        else if (CanSwap())
                         {
-                            OriginalController._inventory.AddAt(Item, OriginPoint); // Return the item to its previous location
+                            var otherItem = CurrentController._inventory.AllItems[0];
+                            CurrentController._inventory.TryRemove(otherItem);
+                            OriginalController._inventory.TryAdd(otherItem);
+                            CurrentController._inventory.TryAdd(Item);
+                            success = true;
                         }
+
+                        // Could not add or swap, return the item
+                        if (!success)
+                        {
+                            OriginalController._inventory.TryAddAt(Item, OriginPoint); // Return the item to its previous location
+                        }
+
                         CurrentController._renderer.ClearSelection();
                     }
                     else
                     {
-                        OriginalController._inventory.Drop(_draggedItem.Item); // Drop the item
+                        OriginalController._inventory.TryDrop(_draggedItem.Item); // Drop the item
                     }
 
                     // Destroy the image representing the item
                     GameObject.Destroy(_image.gameObject);
+                }
+
+                /* 
+                 * Returns true if its possible to swap
+                 */
+                private bool CanSwap()
+                {
+                    if (CurrentController._inventory.CanSwap(Item))
+                    {
+                        var otherItem = CurrentController._inventory.AllItems[0];
+                        if (OriginalController._inventory.CanAdd(otherItem) && CurrentController._inventory.CanRemove(otherItem))
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
             }
         }

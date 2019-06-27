@@ -44,10 +44,10 @@ namespace FarrokhGames.Inventory
             var inventory = new InventoryManager(new TestProvider(), 16, 8);
 
             var item1 = CreateFullItem(1, 1);
-            inventory.Add(item1);
+            inventory.TryAdd(item1);
 
             var item2 = CreateFullItem(2, 2);
-            inventory.Add(item2);
+            inventory.TryAdd(item2);
 
             var allItems = inventory.AllItems;
             Assert.That(allItems.Length, Is.EqualTo(2));
@@ -65,7 +65,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 16, 8);
             var item1 = CreateFullItem(1, 1);
-            if (doAdd) { inventory.Add(item1); }
+            if (doAdd) { inventory.TryAdd(item1); }
             return inventory.Contains(item1);
         }
 
@@ -84,7 +84,7 @@ namespace FarrokhGames.Inventory
         public void IsFull_NotFull_ReturnsFalse()
         {
             var inventory = new InventoryManager(new TestProvider(), 4, 4);
-            inventory.Add(CreateFullItem(2, 2));
+            inventory.TryAdd(CreateFullItem(2, 2));
             Assert.That(inventory.IsFull, Is.False);
         }
 
@@ -92,7 +92,7 @@ namespace FarrokhGames.Inventory
         public void IsFull_Full_ReturnsTrue()
         {
             var inventory = new InventoryManager(new TestProvider(), 2, 2);
-            inventory.Add(CreateFullItem(2, 2));
+            inventory.TryAdd(CreateFullItem(2, 2));
             Assert.That(inventory.IsFull, Is.True);
         }
 
@@ -123,7 +123,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 8, 4);
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
+            inventory.TryAdd(item);
             Assert.That(inventory.CanAdd(item), Is.False);
         }
 
@@ -136,7 +136,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 2, 2);
             var item = CreateFullItem(3, 3);
-            inventory.Add(item);
+            inventory.TryAdd(item);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(0));
         }
 
@@ -145,7 +145,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(3, 3);
-            inventory.Add(item);
+            inventory.TryAdd(item);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
         }
 
@@ -154,8 +154,8 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
-            inventory.Add(item);
+            inventory.TryAdd(item);
+            inventory.TryAdd(item);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
         }
 
@@ -172,7 +172,7 @@ namespace FarrokhGames.Inventory
             };
 
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
+            inventory.TryAdd(item);
 
             Assert.That(lastItem, Is.Not.Null);
             Assert.That(callbacks, Is.EqualTo(1));
@@ -184,7 +184,7 @@ namespace FarrokhGames.Inventory
             var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var callbacks = 0;
             inventory.OnItemAdded += (i) => { callbacks++; };
-            inventory.Add(CreateFullItem(2, 2));
+            inventory.TryAdd(CreateFullItem(2, 2));
             Assert.That(callbacks, Is.EqualTo(0));
         }
 
@@ -214,7 +214,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item1 = CreateFullItem(3, 1);
-            inventory.AddAt(item1, Vector2Int.zero);
+            inventory.TryAddAt(item1, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
             Assert.That(inventory.CanAddAt(CreateFullItem(1, 1), new Vector2Int(1, 0)), Is.False);
         }
@@ -232,7 +232,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 8, 4);
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
+            inventory.TryAdd(item);
             Assert.That(inventory.CanAddAt(item, Vector2Int.zero), Is.False);
         }
 
@@ -245,7 +245,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 2, 2);
             var item = CreateFullItem(3, 3);
-            inventory.AddAt(item, Vector2Int.zero);
+            inventory.TryAddAt(item, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(0));
         }
 
@@ -254,7 +254,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(3, 3);
-            inventory.AddAt(item, Vector2Int.zero);
+            inventory.TryAddAt(item, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
         }
 
@@ -263,10 +263,10 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item1 = CreateFullItem(3, 1);
-            inventory.AddAt(item1, Vector2Int.zero);
+            inventory.TryAddAt(item1, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
             var item2 = CreateFullItem(1, 1);
-            inventory.AddAt(item2, new Vector2Int(1, 0));
+            inventory.TryAddAt(item2, new Vector2Int(1, 0));
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
         }
 
@@ -275,7 +275,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item1 = CreateFullItem(3, 1);
-            inventory.AddAt(item1, new Vector2Int(-1, -1));
+            inventory.TryAddAt(item1, new Vector2Int(-1, -1));
             Assert.That(inventory.AllItems.Count, Is.EqualTo(0));
         }
 
@@ -284,8 +284,8 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
-            inventory.AddAt(item, Vector2Int.zero);
+            inventory.TryAdd(item);
+            inventory.TryAddAt(item, Vector2Int.zero);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));
         }
 
@@ -294,7 +294,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(1, 1);
-            inventory.AddAt(item, Vector2Int.one);
+            inventory.TryAddAt(item, Vector2Int.one);
             Assert.That(item.Position, Is.EqualTo(Vector2Int.one));
         }
 
@@ -311,7 +311,7 @@ namespace FarrokhGames.Inventory
             };
 
             var item = CreateFullItem(1, 1);
-            inventory.AddAt(item, Vector2Int.zero);
+            inventory.TryAddAt(item, Vector2Int.zero);
 
             Assert.That(lastItem, Is.Not.Null);
             Assert.That(callbacks, Is.EqualTo(1));
@@ -323,7 +323,7 @@ namespace FarrokhGames.Inventory
             var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var callbacks = 0;
             inventory.OnItemAdded += (i) => { callbacks++; };
-            inventory.AddAt(CreateFullItem(2, 2), Vector2Int.zero);
+            inventory.TryAddAt(CreateFullItem(2, 2), Vector2Int.zero);
             Assert.That(callbacks, Is.EqualTo(0));
         }
 
@@ -343,7 +343,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
+            inventory.TryAdd(item);
             Assert.That(inventory.CanRemove(item), Is.True);
         }
 
@@ -356,9 +356,9 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
+            inventory.TryAdd(item);
             Assert.That(inventory.Contains(item), Is.True);
-            inventory.Remove(item);
+            inventory.TryRemove(item);
             Assert.That(inventory.Contains(item), Is.False);
         }
 
@@ -368,7 +368,7 @@ namespace FarrokhGames.Inventory
             var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var callbacks = 0;
             inventory.OnItemRemoved += (i) => { callbacks++; };
-            inventory.Remove(CreateFullItem(1, 1));
+            inventory.TryRemove(CreateFullItem(1, 1));
             Assert.That(callbacks, Is.EqualTo(0));
         }
 
@@ -384,8 +384,8 @@ namespace FarrokhGames.Inventory
                 callbacks++;
             };
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
-            inventory.Remove(item);
+            inventory.TryAdd(item);
+            inventory.TryRemove(item);
             Assert.That(lastItem, Is.SameAs(item));
             Assert.That(callbacks, Is.EqualTo(1));
         }
@@ -406,7 +406,7 @@ namespace FarrokhGames.Inventory
             };
 
             var item = CreateFullItem(1, 1);
-            inventory.Drop(item);
+            inventory.TryDrop(item);
 
             Assert.That(callbacks, Is.EqualTo(0));
         }
@@ -416,9 +416,9 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 1, 1);
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
+            inventory.TryAdd(item);
             Assert.That(inventory.Contains(item), Is.True);
-            inventory.Drop(item);
+            inventory.TryDrop(item);
             Assert.That(inventory.Contains(item), Is.False);
         }
 
@@ -436,8 +436,8 @@ namespace FarrokhGames.Inventory
             };
 
             var item = CreateFullItem(1, 1);
-            inventory.Add(item);
-            inventory.Drop(item);
+            inventory.TryAdd(item);
+            inventory.TryDrop(item);
 
             Assert.That(lastItem, Is.SameAs(item));
             Assert.That(callbacks, Is.EqualTo(1));
@@ -454,9 +454,9 @@ namespace FarrokhGames.Inventory
             var item1 = CreateFullItem(1, 1);
             var item2 = CreateFullItem(1, 1);
             var item3 = CreateFullItem(1, 1);
-            inventory.Add(item1);
-            inventory.Add(item2);
-            inventory.Add(item3);
+            inventory.TryAdd(item1);
+            inventory.TryAdd(item2);
+            inventory.TryAdd(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
             inventory.DropAll();
             Assert.That(inventory.AllItems.Count, Is.EqualTo(0));
@@ -479,9 +479,9 @@ namespace FarrokhGames.Inventory
             var item1 = CreateFullItem(1, 1);
             var item2 = CreateFullItem(1, 1);
             var item3 = CreateFullItem(1, 1);
-            inventory.Add(item1);
-            inventory.Add(item2);
-            inventory.Add(item3);
+            inventory.TryAdd(item1);
+            inventory.TryAdd(item2);
+            inventory.TryAdd(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
 
             inventory.DropAll();
@@ -501,7 +501,7 @@ namespace FarrokhGames.Inventory
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
             var item = CreateFullItem(3, 3);
-            inventory.Add(item);
+            inventory.TryAdd(item);
             Assert.That(inventory.Contains(item), Is.True);
             inventory.Clear();
             Assert.That(inventory.Contains(item), Is.False);
@@ -518,9 +518,9 @@ namespace FarrokhGames.Inventory
             var item1 = CreateFullItem(2, 2);
             var item2 = CreateFullItem(1, 2);
             var item3 = CreateFullItem(1, 1);
-            inventory.Add(item1);
-            inventory.Add(item2);
-            inventory.Add(item3);
+            inventory.TryAdd(item1);
+            inventory.TryAdd(item2);
+            inventory.TryAdd(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
 
             Assert.That(inventory.GetAtPoint(new Vector2Int(0, 0)), Is.EqualTo(item1));
@@ -574,9 +574,9 @@ namespace FarrokhGames.Inventory
             var item1 = CreateFullItem(1, 1);
             var item2 = CreateFullItem(2, 1);
             var item3 = CreateFullItem(1, 1);
-            inventory.Add(item1);
-            inventory.Add(item2);
-            inventory.Add(item3);
+            inventory.TryAdd(item1);
+            inventory.TryAdd(item2);
+            inventory.TryAdd(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
             inventory.Resize(3, 3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
@@ -597,9 +597,9 @@ namespace FarrokhGames.Inventory
             var item1 = CreateFullItem(3, 1);
             var item2 = CreateFullItem(1, 1);
             var item3 = CreateFullItem(2, 2);
-            inventory.Add(item1);
-            inventory.Add(item2);
-            inventory.Add(item3);
+            inventory.TryAdd(item1);
+            inventory.TryAdd(item2);
+            inventory.TryAdd(item3);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(3));
             inventory.Resize(2, 2);
             Assert.That(inventory.AllItems.Count, Is.EqualTo(1));

@@ -51,19 +51,21 @@ namespace FarrokhGames.Inventory
         /// Add given item to the inventory. Returns true
         /// if successful
         /// </summary>
-        bool Add(IInventoryItem item);
+        bool TryAdd(IInventoryItem item);
 
         bool CanAddAt(IInventoryItem item, Vector2Int point);
 
-        bool AddAt(IInventoryItem item, Vector2Int Point);
+        bool TryAddAt(IInventoryItem item, Vector2Int Point);
 
         bool CanRemove(IInventoryItem item);
+
+        bool CanSwap(IInventoryItem item);
 
         /// <summary>
         /// Removes given item from this inventory. Returns
         /// true if successful.
         /// </summary>
-        bool Remove(IInventoryItem item);
+        bool TryRemove(IInventoryItem item);
 
         bool CanDrop(IInventoryItem item);
 
@@ -71,7 +73,7 @@ namespace FarrokhGames.Inventory
         /// Removes an item from this inventory. Returns true
         /// if successful.
         /// </summary>
-        bool Drop(IInventoryItem item);
+        bool TryDrop(IInventoryItem item);
 
         /// <summary>
         /// Drops all items from this inventory
@@ -89,5 +91,10 @@ namespace FarrokhGames.Inventory
         /// Get an item at given point within this inventory
         /// </summary>
         IInventoryItem GetAtPoint(Vector2Int point);
+
+        /// <summary>
+        /// Returns all items under given rectangle
+        /// </summary>
+        IInventoryItem[] GetAtPoint(Vector2Int point, Vector2Int size);
     }
 }

@@ -53,7 +53,7 @@ namespace FarrokhGames.Inventory
 
                 if (shouldBeDropped)
                 {
-                    Drop(item);
+                    TryDrop(item);
                 }
                 else
                 {
@@ -109,7 +109,7 @@ namespace FarrokhGames.Inventory
         public Action<IInventoryItem> OnItemRemoved { get; set; }
         public Action OnResized { get; set; }
 
-        public virtual IInventoryItem GetAtPoint(Vector2Int point)
+        public IInventoryItem GetAtPoint(Vector2Int point)
         {
             // Single item override
             if (_provider.InventoryRenderMode == InventoryRenderMode.Single && _provider.IsInventoryFull && _itemCache.Length > 0)
@@ -124,7 +124,22 @@ namespace FarrokhGames.Inventory
             return null;
         }
 
-        public bool Remove(IInventoryItem item)
+        public IInventoryItem[] GetAtPoint(Vector2Int point, Vector2Int size)
+        {
+            var posibleItems = new IInventoryItem[size.x * size.y];
+            var c = 0;
+            for (var x = 0; x < size.x; x++)
+            {
+                for (var y = 0; y < size.y; y++)
+                {
+                    posibleItems[c] = GetAtPoint(point + new Vector2Int(x, y));
+                    c++;
+                }
+            }
+            return posibleItems.Distinct().Where(x => x != null).ToArray();
+        }
+
+        public bool TryRemove(IInventoryItem item)
         {
             if (CanRemove(item))
             {
@@ -140,7 +155,7 @@ namespace FarrokhGames.Inventory
             return false;
         }
 
-        public bool Drop(IInventoryItem item)
+        public bool TryDrop(IInventoryItem item)
         {
             if (CanDrop(item))
             {
@@ -155,19 +170,15 @@ namespace FarrokhGames.Inventory
             return false;
         }
 
-        public virtual bool CanAddAt(IInventoryItem item, Vector2Int point)
+        public bool CanAddAt(IInventoryItem item, Vector2Int point)
         {
-            if (!_provider.CanAddInventoryItem(item))
+            if (!_provider.CanAddInventoryItem(item) || _provider.IsInventoryFull)
             {
                 return false;
             }
             else if (_provider.InventoryRenderMode == InventoryRenderMode.Single)
             {
                 return true;
-            }
-            else if (_provider.IsInventoryFull)
-            {
-                return false;
             }
 
             var previousPoint = item.Position;
@@ -194,9 +205,9 @@ namespace FarrokhGames.Inventory
             return true; // Item can be added
         }
 
-        public virtual bool AddAt(IInventoryItem item, Vector2Int Point)
+        public bool TryAddAt(IInventoryItem item, Vector2Int point)
         {
-            if (CanAddAt(item, Point))
+            if (CanAddAt(item, point))
             {
                 var sucess = _provider.AddInventoryItem(item);
                 if (sucess)
@@ -207,7 +218,7 @@ namespace FarrokhGames.Inventory
                             item.Position = GetCenterPosition(item);
                             break;
                         default:
-                            item.Position = Point;
+                            item.Position = point;
                             break;
                     }
                     Rebuild(true);
@@ -228,15 +239,23 @@ namespace FarrokhGames.Inventory
             return false;
         }
 
-        public bool Add(IInventoryItem item)
+        public bool TryAdd(IInventoryItem item)
         {
             if (!CanAdd(item))return false;
             Vector2Int point;
             if (GetFirstPointThatFitsItem(item, out point))
             {
-                return AddAt(item, point);
+                return TryAddAt(item, point);
             }
             return false;
+        }
+
+        /// <inheritdoc />
+        public bool CanSwap(IInventoryItem item)
+        {
+            return _provider.InventoryRenderMode == InventoryRenderMode.Single &&
+                DoesItemFit(item) &&
+                _provider.CanAddInventoryItem(item);
         }
 
         /// <inheritdoc />
@@ -245,7 +264,7 @@ namespace FarrokhGames.Inventory
             var itemsToDrop = AllItems.ToArray();
             foreach (var item in itemsToDrop)
             {
-                Drop(item);
+                TryDrop(item);
             }
         }
 
@@ -255,7 +274,7 @@ namespace FarrokhGames.Inventory
             var itemsToRemove = AllItems.ToArray();
             foreach (var item in AllItems)
             {
-                Remove(item);
+                TryRemove(item);
             }
         }
 
@@ -279,25 +298,38 @@ namespace FarrokhGames.Inventory
          */
         private bool GetFirstPointThatFitsItem(IInventoryItem item, out Vector2Int point)
         {
-            for (var x = 0; x < Width - (item.Width - 1); x++)
+            if (DoesItemFit(item))
             {
-                for (var y = 0; y < Height - (item.Height - 1); y++)
+                for (var x = 0; x < Width - (item.Width - 1); x++)
                 {
-                    point = new Vector2Int(x, y);
-                    if (CanAddAt(item, point))return true;
+                    for (var y = 0; y < Height - (item.Height - 1); y++)
+                    {
+                        point = new Vector2Int(x, y);
+                        if (CanAddAt(item, point))return true;
+                    }
                 }
             }
             point = Vector2Int.zero;
             return false;
         }
 
+        /* 
+         * Returns true if given items physically fits within this inventory
+         */
+        private bool DoesItemFit(IInventoryItem item)
+        {
+            return item.Width <= Width && item.Height <= Height;
+        }
+
+        /*
+         * Returns the center post position for a given item within this inventory
+         */
         private Vector2Int GetCenterPosition(IInventoryItem item)
         {
             return new Vector2Int(
                 (_size.x - item.Width) / 2,
                 (_size.y - item.Height) / 2
             );
-
         }
     }
 }

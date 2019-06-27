@@ -30,7 +30,7 @@ namespace FarrokhGames.Inventory.Examples
                 var tries = (_width * _height) / 3;
                 for (var i = 0; i < tries; i++)
                 {
-                    inventory.Add(_definitions[Random.Range(0, _definitions.Length)].CreateInstance());
+                    inventory.TryAdd(_definitions[Random.Range(0, _definitions.Length)].CreateInstance());
                 }
             }
 
@@ -39,7 +39,7 @@ namespace FarrokhGames.Inventory.Examples
             {
                 for (var i = 0; i < _width * _height; i++)
                 {
-                    inventory.Add(_definitions[0].CreateInstance());
+                    inventory.TryAdd(_definitions[0].CreateInstance());
                 }
             }
 
