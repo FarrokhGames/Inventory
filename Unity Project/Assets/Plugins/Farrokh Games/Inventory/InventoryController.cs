@@ -6,22 +6,54 @@ using UnityEngine.UI;
 
 namespace FarrokhGames.Inventory
 {
+    public interface IInventoryController
+    {
+        Action<IInventoryItem> OnItemHovered { get; set; }
+        Action<IInventoryItem> OnItemPickedUp { get; set; }
+        Action<IInventoryItem> OnItemAdded { get; set; }
+        Action<IInventoryItem> OnItemSwapped { get; set; }
+        Action<IInventoryItem> OnItemReturned { get; set; }
+        Action<IInventoryItem> OnItemDropped { get; set; }
+    }
+
     /// <summary>
     /// Enables human interaction with an inventory renderer using Unity's event systems
     /// </summary>
     [RequireComponent(typeof(InventoryRenderer))]
     public class InventoryController : MonoBehaviour,
         IPointerDownHandler, IBeginDragHandler, IDragHandler,
-        IEndDragHandler, IPointerExitHandler, IPointerEnterHandler
+        IEndDragHandler, IPointerExitHandler, IPointerEnterHandler,
+        IInventoryController
         {
             // The dragged item is static and shared by all controllers
             // This way items can be moved between controllers easily
             private static DraggedItem _draggedItem = null;
 
+            /// <inheritdoc />
+            public Action<IInventoryItem> OnItemHovered { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> OnItemPickedUp { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> OnItemAdded { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> OnItemSwapped { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> OnItemReturned { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> OnItemDropped { get; set; }
+
             private Canvas _canvas;
             private InventoryRenderer _renderer;
             private IInventoryManager _inventory { get { return _renderer._inventory; } }
+
             private IInventoryItem _itemToDrag;
+            private PointerEventData _currentEventData = null;
+            private IInventoryItem _lastHoveredItem = null;
 
             /*
              * Setup
@@ -74,6 +106,8 @@ namespace FarrokhGames.Inventory
 
                     // Remove the item from inventory
                     _inventory.TryRemove(_itemToDrag);
+
+                    if (OnItemPickedUp != null) { OnItemPickedUp(_itemToDrag); }
                 }
             }
 
@@ -96,7 +130,25 @@ namespace FarrokhGames.Inventory
             {
                 if (_draggedItem != null)
                 {
-                    _draggedItem.Drop(eventData.position);
+                    var mode = _draggedItem.Drop(eventData.position);
+
+                    switch (mode)
+                    {
+                        case DraggedItem.DropMode.Added:
+                            if (OnItemAdded != null) { OnItemAdded(_itemToDrag); }
+                            break;
+                        case DraggedItem.DropMode.Swapped:
+                            if (OnItemSwapped != null) { OnItemSwapped(_itemToDrag); }
+                            break;
+                        case DraggedItem.DropMode.Returned:
+                            if (OnItemReturned != null) { OnItemReturned(_itemToDrag); }
+                            break;
+                        case DraggedItem.DropMode.Dropped:
+                            if (OnItemDropped != null) { OnItemDropped(_itemToDrag); }
+                            ClearHoveredItem();
+                            break;
+                    }
+
                     _draggedItem = null;
                 }
             }
@@ -112,6 +164,8 @@ namespace FarrokhGames.Inventory
                     _draggedItem.CurrentController = null;
                     _renderer.ClearSelection();
                 }
+                else { ClearHoveredItem(); }
+                _currentEventData = null;
             }
 
             /*
@@ -124,6 +178,37 @@ namespace FarrokhGames.Inventory
                     // Change which controller is in control of the dragged item
                     _draggedItem.CurrentController = this;
                 }
+                _currentEventData = eventData;
+            }
+
+            /*
+             * Update loop
+             */
+            void Update()
+            {
+                // Detect hover
+                if (_draggedItem == null && _currentEventData != null)
+                {
+                    var grid = ScreenToGrid(_currentEventData.position);
+                    var item = _inventory.GetAtPoint(grid);
+                    if (item != _lastHoveredItem)
+                    {
+                        if (OnItemHovered != null) { OnItemHovered(item); }
+                        _lastHoveredItem = item;
+                    }
+                }
+            }
+
+            /* 
+             * 
+             */
+            private void ClearHoveredItem()
+            {
+                if (_lastHoveredItem != null && OnItemHovered != null)
+                {
+                    OnItemHovered(null);
+                }
+                _lastHoveredItem = null;
             }
 
             /*
@@ -164,6 +249,14 @@ namespace FarrokhGames.Inventory
             /// </summary>
             public class DraggedItem
             {
+                public enum DropMode
+                {
+                    Added,
+                    Swapped,
+                    Returned,
+                    Dropped,
+                }
+
                 /// <summary>
                 /// Returns the InventoryController this item originated from
                 /// </summary>
@@ -248,18 +341,18 @@ namespace FarrokhGames.Inventory
                 /// Drop this item at the given position
                 /// </summary>
                 /// <param name="position">The position at which to drop the item</param>
-                public void Drop(Vector2 position)
+                public DropMode Drop(Vector2 position)
                 {
+                    DropMode mode;
                     if (CurrentController != null)
                     {
                         var grid = CurrentController.ScreenToGrid(position + _offset + CurrentController.GetDraggedItemOffset(Item));
-                        var success = false;
 
                         // Try to add new item
                         if (CurrentController._inventory.CanAddAt(Item, grid))
                         {
                             CurrentController._inventory.TryAddAt(Item, grid); // Place the item in a new location
-                            success = true;
+                            mode = DropMode.Added;
                         }
                         // Adding did not work, try to swap
                         else if (CanSwap())
@@ -268,24 +361,28 @@ namespace FarrokhGames.Inventory
                             CurrentController._inventory.TryRemove(otherItem);
                             OriginalController._inventory.TryAdd(otherItem);
                             CurrentController._inventory.TryAdd(Item);
-                            success = true;
+                            mode = DropMode.Swapped;
                         }
-
                         // Could not add or swap, return the item
-                        if (!success)
+                        else
                         {
                             OriginalController._inventory.TryAddAt(Item, OriginPoint); // Return the item to its previous location
+                            mode = DropMode.Returned;
+
                         }
 
                         CurrentController._renderer.ClearSelection();
                     }
                     else
                     {
+                        mode = DropMode.Dropped;
                         OriginalController._inventory.TryDrop(_draggedItem.Item); // Drop the item
                     }
 
                     // Destroy the image representing the item
                     GameObject.Destroy(_image.gameObject);
+
+                    return mode;
                 }
 
                 /* 
