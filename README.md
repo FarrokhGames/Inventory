@@ -1,6 +1,6 @@
 ## A Diablo 2-style inventory system for Unity3D
 
-<img src="Documentation/inventory1.gif?raw=true" alt="Zenject" width="512px" height="512px"/>
+<img src="Documentation/inventory1.gif?raw=true" alt="Zenject" width="640px" height="512px"/>
 
 ## Table of Contents
 - <a href="#features">Features</a>
