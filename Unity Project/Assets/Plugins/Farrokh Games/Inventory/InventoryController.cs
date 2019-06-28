@@ -116,10 +116,11 @@ namespace FarrokhGames.Inventory
              */
             public void OnDrag(PointerEventData eventData)
             {
+                _currentEventData = eventData;
                 if (_draggedItem != null)
                 {
                     // Update the items position
-                    _draggedItem.Position = eventData.position;
+                    //_draggedItem.Position = eventData.position;
                 }
             }
 
@@ -186,15 +187,23 @@ namespace FarrokhGames.Inventory
              */
             void Update()
             {
-                // Detect hover
-                if (_draggedItem == null && _currentEventData != null)
+                if (_currentEventData != null)
                 {
-                    var grid = ScreenToGrid(_currentEventData.position);
-                    var item = _inventory.GetAtPoint(grid);
-                    if (item != _lastHoveredItem)
+                    if (_draggedItem == null)
                     {
-                        if (OnItemHovered != null) { OnItemHovered(item); }
-                        _lastHoveredItem = item;
+                        // Detect hover
+                        var grid = ScreenToGrid(_currentEventData.position);
+                        var item = _inventory.GetAtPoint(grid);
+                        if (item != _lastHoveredItem)
+                        {
+                            if (OnItemHovered != null) { OnItemHovered(item); }
+                            _lastHoveredItem = item;
+                        }
+                    }
+                    else
+                    {
+                        // Update position while dragging
+                        _draggedItem.Position = _currentEventData.position;
                     }
                 }
             }

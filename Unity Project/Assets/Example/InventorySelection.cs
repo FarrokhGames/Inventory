@@ -23,7 +23,14 @@ namespace FarrokhGames.Inventory.Examples
 
         private void HandleItemHover(IInventoryItem item)
         {
-            _text.text = item != null ? item.Sprite.name : string.Empty;
+            if (item != null)
+            {
+                _text.text = (item as ItemDefinition).Name;
+            }
+            else
+            {
+                _text.text = string.Empty;
+            }
         }
     }
 }

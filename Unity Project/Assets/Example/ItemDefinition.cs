@@ -50,7 +50,9 @@ namespace FarrokhGames.Inventory.Examples
         /// </summary>
         public IInventoryItem CreateInstance()
         {
-            return ScriptableObject.Instantiate(this);
+            var clone = ScriptableObject.Instantiate(this);
+            clone.name = clone.name.Substring(0, clone.name.Length - 7); // Remove (Clone) from name
+            return clone;
         }
     }
 }

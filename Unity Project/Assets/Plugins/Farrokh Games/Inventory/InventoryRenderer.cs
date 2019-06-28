@@ -139,25 +139,38 @@ namespace FarrokhGames.Inventory
 
             // Render new grid
             var containerSize = new Vector2(CellSize.x * _inventory.Width, CellSize.y * _inventory.Height);
-            var topLeft = new Vector3(-containerSize.x / 2, -containerSize.y / 2, 0); // Calculate topleft corner
-            var halfCellSize = new Vector3(CellSize.x / 2, CellSize.y / 2, 0); // Calulcate cells half-size
-
-            // Spawn grid images
-            _grids = new Image[_inventory.Width * _inventory.Height];
-            var c = 0;
-            for (int y = 0; y < _inventory.Height; y++)
+            Image grid;
+            switch (_renderMode)
             {
-                for (int x = 0; x < _inventory.Width; x++)
-                {
-                    var grid = CreateImage(_cellSpriteEmpty, true);
-                    grid.gameObject.name = "Grid " + c;
+                case InventoryRenderMode.Single:
+                    grid = CreateImage(_cellSpriteEmpty, true);
                     grid.rectTransform.SetAsFirstSibling();
                     grid.type = Image.Type.Sliced;
-                    grid.rectTransform.localPosition = topLeft + new Vector3(CellSize.x * ((_inventory.Width - 1) - x), CellSize.y * y, 0) + halfCellSize;
-                    grid.rectTransform.sizeDelta = CellSize;
-                    _grids[c] = grid;
-                    c++;
-                }
+                    grid.rectTransform.localPosition = Vector3.zero;
+                    grid.rectTransform.sizeDelta = containerSize;
+                    _grids = new Image[] { grid };
+                    break;
+                default:
+                    // Spawn grid images
+                    var topLeft = new Vector3(-containerSize.x / 2, -containerSize.y / 2, 0); // Calculate topleft corner
+                    var halfCellSize = new Vector3(CellSize.x / 2, CellSize.y / 2, 0); // Calulcate cells half-size
+                    _grids = new Image[_inventory.Width * _inventory.Height];
+                    var c = 0;
+                    for (int y = 0; y < _inventory.Height; y++)
+                    {
+                        for (int x = 0; x < _inventory.Width; x++)
+                        {
+                            grid = CreateImage(_cellSpriteEmpty, true);
+                            grid.gameObject.name = "Grid " + c;
+                            grid.rectTransform.SetAsFirstSibling();
+                            grid.type = Image.Type.Sliced;
+                            grid.rectTransform.localPosition = topLeft + new Vector3(CellSize.x * ((_inventory.Width - 1) - x), CellSize.y * y, 0) + halfCellSize;
+                            grid.rectTransform.sizeDelta = CellSize;
+                            _grids[c] = grid;
+                            c++;
+                        }
+                    }
+                    break;
             }
 
             // Set the size of the main RectTransform
@@ -192,7 +205,6 @@ namespace FarrokhGames.Inventory
         private void HandleItemAdded(IInventoryItem item)
         {
             var img = CreateImage(item.Sprite, false);
-            //img.gameObject.name = item.Name;
 
             if (_renderMode == InventoryRenderMode.Single)
             {
@@ -264,21 +276,31 @@ namespace FarrokhGames.Inventory
         {
             if (item == null) { return; }
             ClearSelection();
-            for (var x = 0; x < item.Width; x++)
+
+            switch (_renderMode)
             {
-                for (var y = 0; y < item.Height; y++)
-                {
-                    if (item.IsPartOfShape(new Vector2Int(x, y)))
+                case InventoryRenderMode.Single:
+                    _grids[0].sprite = blocked ? _cellSpriteBlocked : _cellSpriteSelected;
+                    _grids[0].color = color;
+                    break;
+                default:
+                    for (var x = 0; x < item.Width; x++)
                     {
-                        var p = item.Position + new Vector2Int(x, y);
-                        if (p.x >= 0 && p.x < _inventory.Width && p.y >= 0 && p.y < _inventory.Height)
+                        for (var y = 0; y < item.Height; y++)
                         {
-                            var index = p.y * _inventory.Width + ((_inventory.Width - 1) - p.x);
-                            _grids[index].sprite = blocked ? _cellSpriteBlocked : _cellSpriteSelected;
-                            _grids[index].color = color;
+                            if (item.IsPartOfShape(new Vector2Int(x, y)))
+                            {
+                                var p = item.Position + new Vector2Int(x, y);
+                                if (p.x >= 0 && p.x < _inventory.Width && p.y >= 0 && p.y < _inventory.Height)
+                                {
+                                    var index = p.y * _inventory.Width + ((_inventory.Width - 1) - p.x);
+                                    _grids[index].sprite = blocked ? _cellSpriteBlocked : _cellSpriteSelected;
+                                    _grids[index].color = color;
+                                }
+                            }
                         }
                     }
-                }
+                    break;
             }
         }
 
