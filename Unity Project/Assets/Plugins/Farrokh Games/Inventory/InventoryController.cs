@@ -93,7 +93,7 @@ namespace FarrokhGames.Inventory
 
                 // Create a dragged item 
                 _draggedItem = new DraggedItem(
-                    _canvas.transform as RectTransform,
+                    _canvas,
                     this,
                     _itemToDrag.position,
                     _itemToDrag,
@@ -223,24 +223,13 @@ namespace FarrokhGames.Inventory
                 return new Vector2Int(Mathf.FloorToInt(pos.x / inventoryRenderer.cellSize.x), Mathf.FloorToInt(pos.y / inventoryRenderer.cellSize.y));
             }
 
-            /*
-             * Returns the offset between dragged item and the grid 
-             */
-            internal Vector2 GetDraggedItemOffset(IInventoryItem item)
-            {
-                var gx = -((item.width * inventoryRenderer.cellSize.x) / 2f) + (inventoryRenderer.cellSize.x / 2);
-                var gy = -((item.height * inventoryRenderer.cellSize.y) / 2f) + (inventoryRenderer.cellSize.y / 2);
-                return new Vector2(gx, gy);
-            }
-
             private Vector2 ScreenToLocalPositionInRenderer(Vector2 screenPosition)
             {
-                Vector2 localPosition;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     inventoryRenderer.rectTransform,
                     screenPosition,
                     _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera,
-                    out localPosition
+                    out var localPosition
                 );
                 return localPosition;
             }

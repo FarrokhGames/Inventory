@@ -44,7 +44,6 @@ namespace FarrokhGames.Inventory.Examples
 
         public bool DropInventoryItem(IInventoryItem item)
         {
-            UnityEngine.Debug.Log("Item dropped");
             return RemoveInventoryItem(item);
         }
 

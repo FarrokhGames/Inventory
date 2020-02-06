@@ -37,21 +37,22 @@ namespace FarrokhGames.Inventory
         /// </summary>
         public InventoryController currentController;
 
-        private readonly RectTransform _canvasTransform;
+        private readonly Canvas _canvas;
+        private readonly RectTransform _canvasRect;
         private readonly Image _image;
         private Vector2 _offset;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="canvasTransform">The rectTransform of the canvas</param>
+        /// <param name="canvas">The canvas</param>
         /// <param name="originalController">The InventoryController this item originated from</param>
         /// <param name="originPoint">The point inside the inventory from which this item originated from</param>
         /// <param name="item">The item-instance that is being dragged</param>
         /// <param name="offset">The starting offset of this item</param>
         [SuppressMessage("ReSharper", "Unity.InefficientPropertyAccess")]
         public DraggedItem(
-            RectTransform canvasTransform,
+            Canvas canvas,
             InventoryController originalController,
             Vector2Int originPoint,
             IInventoryItem item,
@@ -62,13 +63,15 @@ namespace FarrokhGames.Inventory
             this.originPoint = originPoint;
             this.item = item;
 
-            _canvasTransform = canvasTransform;
-            _offset = offset;
+            _canvas = canvas;
+            _canvasRect = canvas.transform as RectTransform;
+
+            _offset = offset; 
 
             // Create an image representing the dragged item
             _image = new GameObject("DraggedItem").AddComponent<Image>();
             _image.raycastTarget = false;
-            _image.transform.SetParent(_canvasTransform);
+            _image.transform.SetParent(_canvas.transform);
             _image.transform.SetAsLastSibling();
             _image.transform.localScale = Vector3.one;
             _image.sprite = item.sprite;
@@ -83,12 +86,14 @@ namespace FarrokhGames.Inventory
             set
             {
                 // Move the image
-                _image.rectTransform.localPosition = (value - (_canvasTransform.sizeDelta * 0.5f)) + _offset;
-
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvasRect, value + _offset, _canvas.worldCamera,  out var newValue);
+                _image.rectTransform.localPosition = newValue;
+                
+                
                 // Make selections
                 if (currentController != null)
                 {
-                    item.position = currentController.ScreenToGrid(value + _offset + currentController.GetDraggedItemOffset(item));
+                    item.position = currentController.ScreenToGrid(value + _offset + GetDraggedItemOffset(currentController.inventoryRenderer, item));
                     var canAdd = currentController.inventory.CanAddAt(item, item.position) || CanSwap();
                     currentController.inventoryRenderer.SelectItem(item, !canAdd, Color.white);
                 }
@@ -106,7 +111,7 @@ namespace FarrokhGames.Inventory
             DropMode mode;
             if (currentController != null)
             {
-                var grid = currentController.ScreenToGrid(pos + _offset + currentController.GetDraggedItemOffset(item));
+                var grid = currentController.ScreenToGrid(pos + _offset + GetDraggedItemOffset(currentController.inventoryRenderer, item));
 
                 // Try to add new item
                 if (currentController.inventory.CanAddAt(item, grid))
@@ -145,6 +150,20 @@ namespace FarrokhGames.Inventory
             return mode;
         }
 
+        /*
+         * Returns the offset between dragged item and the grid 
+         */
+        private Vector2 GetDraggedItemOffset(InventoryRenderer renderer, IInventoryItem item)
+        {
+            var scale = new Vector2(
+                Screen.width / _canvasRect.sizeDelta.x,
+                Screen.height / _canvasRect.sizeDelta.y
+            );
+            var gx = -(item.width * renderer.cellSize.x / 2f) + (renderer.cellSize.x / 2);
+            var gy = -(item.height * renderer.cellSize.y / 2f) + (renderer.cellSize.y / 2);
+            return new Vector2(gx, gy) * scale;
+        }
+        
         /* 
          * Returns true if its possible to swap
          */
