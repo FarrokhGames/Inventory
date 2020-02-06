@@ -43,28 +43,19 @@ namespace FarrokhGames.Shared
         /// <summary>
         /// Returns the current number of objects in the pool
         /// </summary>
-        public int Count
-        {
-            get { return _inactive.Count; }
-        }
+        public int Count => _inactive.Count;
 
         /// <summary>
         /// Returns true if the pool is empty.
 		/// Note that objects can still be taken from an empty pool, if allowTakingWhenEmpty 
         /// is set to true, but that additional allocations will be imposed.
-        public bool IsEmpty
-        {
-            get { return Count == 0; }
-        }
+        public bool IsEmpty => Count == 0;
 
         /// <summary>
         /// Returns true of an item can be taken from the pool right now.
         /// This is not the same as whether or not the pool is empty.
         /// </summary>
-        public bool CanTake
-        {
-            get { return _allowTakingWhenEmpty || !IsEmpty; }
-        }
+        public bool CanTake => _allowTakingWhenEmpty || !IsEmpty;
 
         /// <summary>
         /// Takes an object from the pool.

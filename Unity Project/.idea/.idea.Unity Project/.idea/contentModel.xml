@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_Unity Project.478473386.00" t="ExcludeRecursive" />
+    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+      <e p="Assembly-CSharp-Editor-firstpass.csproj" t="IncludeRecursive" />
+      <e p="Assembly-CSharp-firstpass.csproj" t="IncludeRecursive" />
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
+      <e p="Assets" t="Include">
+        <e p="Example" t="Include">
+          <e p="InventoryProvider.cs" t="Include" />
+          <e p="InventorySelection.cs" t="Include" />
+          <e p="ItemDefinition.cs" t="Include" />
+          <e p="ItemTypes.cs" t="Include" />
+          <e p="SizeInventoryExample.cs" t="Include" />
+        </e>
+        <e p="Plugins" t="Include">
+          <e p="Farrokh Games" t="Include">
+            <e p="Inventory" t="Include">
+              <e p="DraggedItem.cs" t="Include" />
+              <e p="Editor" t="Include">
+                <e p="InventoryShapePropertyDrawer.cs" t="Include" />
+                <e p="Tests" t="Include">
+                  <e p="InventoryManagerTests.cs" t="Include" />
+                  <e p="InventoryShapeTests.cs" t="Include" />
+                  <e p="TestItem.cs" t="Include" />
+                  <e p="TestProvider.cs" t="Include" />
+                </e>
+              </e>
+              <e p="IInventoryItem.cs" t="Include" />
+              <e p="IInventoryManager.cs" t="Include" />
+              <e p="IInventoryProvider.cs" t="Include" />
+              <e p="InventoryController.cs" t="Include" />
+              <e p="InventoryManager.cs" t="Include" />
+              <e p="InventoryRenderer.cs" t="Include" />
+              <e p="InventoryRenderMode.cs" t="Include" />
+              <e p="InventoryShape.cs" t="Include" />
+            </e>
+            <e p="LICENSE.txt" t="Include" />
+            <e p="Shared" t="Include">
+              <e p="Editor" t="Include">
+                <e p="Tests" t="Include">
+                  <e p="PoolTests.cs" t="Include" />
+                </e>
+              </e>
+              <e p="Pool.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="Packages" t="ExcludeRecursive" />
+      <e p="Temp/bin" t="ExcludeRecursive" />
+      <e p="Unity Project.sln" t="IncludeFlat" />
+    </e>
+  </component>
+</project>

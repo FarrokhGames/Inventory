@@ -4,15 +4,19 @@ namespace FarrokhGames.Inventory
 {
     public class TestItem : IInventoryItem
     {
-        public string Name { get; private set; }
-        public Sprite Sprite { get; private set; }
-        public InventoryShape Shape { get; private set; }
-
-        public TestItem(string name, Sprite sprite, InventoryShape shape)
+        private readonly InventoryShape _shape;
+        
+        public TestItem(Sprite sprite, InventoryShape shape)
         {
-            Name = name;
-            Sprite = sprite;
-            Shape = shape;
+            this.sprite = sprite;
+            _shape = shape;
+            position = Vector2Int.zero;
         }
+
+        public Sprite sprite { get; }
+        public int width => _shape.width;
+        public int height => _shape.height;
+        public Vector2Int position { get; set; }
+        public bool IsPartOfShape(Vector2Int localPosition) => _shape.IsPartOfShape(localPosition);
     }
 }

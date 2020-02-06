@@ -1,35 +1,65 @@
 using System;
-using FarrokhGames.Shared;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace FarrokhGames.Inventory
 {
+    public interface IInventoryController
+    {
+        Action<IInventoryItem> onItemHovered { get; set; }
+        Action<IInventoryItem> onItemPickedUp { get; set; }
+        Action<IInventoryItem> onItemAdded { get; set; }
+        Action<IInventoryItem> onItemSwapped { get; set; }
+        Action<IInventoryItem> onItemReturned { get; set; }
+        Action<IInventoryItem> onItemDropped { get; set; }
+    }
+
     /// <summary>
     /// Enables human interaction with an inventory renderer using Unity's event systems
     /// </summary>
     [RequireComponent(typeof(InventoryRenderer))]
     public class InventoryController : MonoBehaviour,
         IPointerDownHandler, IBeginDragHandler, IDragHandler,
-        IEndDragHandler, IPointerExitHandler, IPointerEnterHandler
+        IEndDragHandler, IPointerExitHandler, IPointerEnterHandler,
+        IInventoryController
         {
             // The dragged item is static and shared by all controllers
             // This way items can be moved between controllers easily
-            private static DraggedItem _draggedItem = null;
+            private static DraggedItem _draggedItem;
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> onItemHovered { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> onItemPickedUp { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> onItemAdded { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> onItemSwapped { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> onItemReturned { get; set; }
+
+            /// <inheritdoc />
+            public Action<IInventoryItem> onItemDropped { get; set; }
 
             private Canvas _canvas;
-            private InventoryRenderer _renderer;
-            private InventoryManager _inventory { get { return _renderer._inventory; } }
+            internal InventoryRenderer inventoryRenderer;
+            internal IInventoryManager inventory => inventoryRenderer.inventory;
+
             private IInventoryItem _itemToDrag;
+            private PointerEventData _currentEventData;
+            private IInventoryItem _lastHoveredItem;
 
             /*
              * Setup
              */
             void Awake()
             {
-                _renderer = GetComponent<InventoryRenderer>();
-                if (_renderer == null) { throw new NullReferenceException("Could not find a renderer. This is not allowed!"); }
+                inventoryRenderer = GetComponent<InventoryRenderer>();
+                if (inventoryRenderer == null) { throw new NullReferenceException("Could not find a renderer. This is not allowed!"); }
 
                 // Find the canvas
                 var canvases = GetComponentsInParent<Canvas>();
@@ -42,12 +72,10 @@ namespace FarrokhGames.Inventory
              */
             public void OnPointerDown(PointerEventData eventData)
             {
-                if (_draggedItem == null)
-                {
-                    // Get which item to drag (item will be null of none were found)
-                    var grid = ScreenToGrid(eventData.position);
-                    _itemToDrag = _inventory.GetAtPoint(grid);
-                }
+                if (_draggedItem != null) return;
+                // Get which item to drag (item will be null of none were found)
+                var grid = ScreenToGrid(eventData.position);
+                _itemToDrag = inventory.GetAtPoint(grid);
             }
 
             /*
@@ -55,26 +83,27 @@ namespace FarrokhGames.Inventory
              */
             public void OnBeginDrag(PointerEventData eventData)
             {
-                _renderer.ClearSelection();
+                inventoryRenderer.ClearSelection();
 
-                if (_itemToDrag != null && _draggedItem == null)
-                {
-                    var localPosition = ScreenToLocalPositionInRenderer(eventData.position);
-                    var itemOffest = _renderer.GetItemOffset(_itemToDrag);
-                    var offset = itemOffest - localPosition;
+                if (_itemToDrag == null || _draggedItem != null) return;
+                
+                var localPosition = ScreenToLocalPositionInRenderer(eventData.position);
+                var itemOffest = inventoryRenderer.GetItemOffset(_itemToDrag);
+                var offset = itemOffest - localPosition;
 
-                    // Create a dragged item 
-                    _draggedItem = new DraggedItem(
-                        _canvas,
-                        this,
-                        _itemToDrag.Shape.Position,
-                        _itemToDrag,
-                        offset
-                    );
+                // Create a dragged item 
+                _draggedItem = new DraggedItem(
+                    _canvas,
+                    this,
+                    _itemToDrag.position,
+                    _itemToDrag,
+                    offset
+                );
 
-                    // Remove the item from inventory
-                    _inventory.Remove(_itemToDrag);
-                }
+                // Remove the item from inventory
+                inventory.TryRemove(_itemToDrag);
+
+                onItemPickedUp?.Invoke(_itemToDrag);
             }
 
             /*
@@ -82,10 +111,11 @@ namespace FarrokhGames.Inventory
              */
             public void OnDrag(PointerEventData eventData)
             {
+                _currentEventData = eventData;
                 if (_draggedItem != null)
                 {
                     // Update the items position
-                    _draggedItem.Position = eventData.position;
+                    //_draggedItem.Position = eventData.position;
                 }
             }
 
@@ -94,11 +124,28 @@ namespace FarrokhGames.Inventory
              */
             public void OnEndDrag(PointerEventData eventData)
             {
-                if (_draggedItem != null)
+                if (_draggedItem == null) return;
+                
+                var mode = _draggedItem.Drop(eventData.position);
+
+                switch (mode)
                 {
-                    _draggedItem.Drop(eventData.position);
-                    _draggedItem = null;
+                    case DraggedItem.DropMode.Added:
+                        onItemAdded?.Invoke(_itemToDrag);
+                        break;
+                    case DraggedItem.DropMode.Swapped:
+                        onItemSwapped?.Invoke(_itemToDrag);
+                        break;
+                    case DraggedItem.DropMode.Returned:
+                        onItemReturned?.Invoke(_itemToDrag);
+                        break;
+                    case DraggedItem.DropMode.Dropped:
+                        onItemDropped?.Invoke(_itemToDrag);
+                        ClearHoveredItem();
+                        break;
                 }
+
+                _draggedItem = null;
             }
 
             /*
@@ -109,9 +156,11 @@ namespace FarrokhGames.Inventory
                 if (_draggedItem != null)
                 {
                     // Clear the item as it leaves its current controller
-                    _draggedItem.CurrentController = null;
-                    _renderer.ClearSelection();
+                    _draggedItem.currentController = null;
+                    inventoryRenderer.ClearSelection();
                 }
+                else { ClearHoveredItem(); }
+                _currentEventData = null;
             }
 
             /*
@@ -122,155 +171,67 @@ namespace FarrokhGames.Inventory
                 if (_draggedItem != null)
                 {
                     // Change which controller is in control of the dragged item
-                    _draggedItem.CurrentController = this;
+                    _draggedItem.currentController = this;
                 }
+                _currentEventData = eventData;
+            }
+
+            /*
+             * Update loop
+             */
+            void Update()
+            {
+                if (_currentEventData == null) return;
+                
+                if (_draggedItem == null)
+                {
+                    // Detect hover
+                    var grid = ScreenToGrid(_currentEventData.position);
+                    var item = inventory.GetAtPoint(grid);
+                    if (item == _lastHoveredItem) return;
+                    onItemHovered?.Invoke(item);
+                    _lastHoveredItem = item;
+                }
+                else
+                {
+                    // Update position while dragging
+                    _draggedItem.position = _currentEventData.position;
+                }
+            }
+
+            /* 
+             * 
+             */
+            private void ClearHoveredItem()
+            {
+                if (_lastHoveredItem != null)
+                {
+                    onItemHovered?.Invoke(null);
+                }
+                _lastHoveredItem = null;
             }
 
             /*
              * Get a point on the grid from a given screen point
              */
-            private Vector2Int ScreenToGrid(Vector2 screenPoint)
+            internal Vector2Int ScreenToGrid(Vector2 screenPoint)
             {
                 var pos = ScreenToLocalPositionInRenderer(screenPoint);
-                pos.x += _renderer.RectTransform.sizeDelta.x / 2;
-                pos.y += _renderer.RectTransform.sizeDelta.y / 2;
-                return new Vector2Int(Mathf.FloorToInt(pos.x / _renderer.CellSize.x), Mathf.FloorToInt(pos.y / _renderer.CellSize.y));
-            }
-
-            /*
-             * Returns the offset between dragged item and the grid 
-             */
-            private Vector2 GetDraggedItemOffset(IInventoryItem item)
-            {
-                var gx = -((item.Shape.Width * _renderer.CellSize.x) / 2f) + (_renderer.CellSize.x / 2);
-                var gy = -((item.Shape.Height * _renderer.CellSize.y) / 2f) + (_renderer.CellSize.y / 2);
-                return new Vector2(gx, gy);
+                var sizeDelta = inventoryRenderer.rectTransform.sizeDelta;
+                pos.x += sizeDelta.x / 2;
+                pos.y += sizeDelta.y / 2;
+                return new Vector2Int(Mathf.FloorToInt(pos.x / inventoryRenderer.cellSize.x), Mathf.FloorToInt(pos.y / inventoryRenderer.cellSize.y));
             }
 
             private Vector2 ScreenToLocalPositionInRenderer(Vector2 screenPosition)
             {
-                Vector2 localPosition;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    _renderer.RectTransform,
+                    inventoryRenderer.rectTransform,
                     screenPosition,
                     _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera,
-                    out localPosition
+                    out var localPosition
                 );
                 return localPosition;
-            }
-
-            /// <summary>
-            /// Class for keeping track of dragged items
-            /// </summary>
-            public class DraggedItem
-            {
-                /// <summary>
-                /// Returns the InventoryController this item originated from
-                /// </summary>
-                public InventoryController OriginalController { get; private set; }
-
-                /// <summary>
-                /// Returns the point inside the inventory from which this item originated from
-                /// </summary>
-                public Vector2Int OriginPoint { get; private set; }
-
-                /// <summary>
-                /// Returns the item-instance that is being dragged
-                /// </summary>
-                public IInventoryItem Item { get; private set; }
-
-                /// <summary>
-                /// Gets or sets the InventoryController currently in control of this item
-                /// </summary>
-                public InventoryController CurrentController;
-
-                private RectTransform _canvasTransform;
-                private Image _image;
-                private Vector2 _offset;
-
-                /// <summary>
-                /// Constructor
-                /// </summary>
-                /// <param name="originalController">The InventoryController this item originated from</param>
-                /// <param name="originPoint">The point inside the inventory from which this item originated from</param>
-                /// <param name="item">The item-instance that is being dragged</param>
-                /// <param name="offset">The starting offset of this item</param>
-                public DraggedItem(
-                    Canvas canvas,
-                    InventoryController originalController,
-                    Vector2Int originPoint,
-                    IInventoryItem item,
-                    Vector2 offset)
-                {
-                    OriginalController = originalController;
-                    CurrentController = OriginalController;
-                    OriginPoint = originPoint;
-                    Item = item;
-
-                    _canvasTransform = canvas.transform as RectTransform;;
-                    _offset = offset;
-
-                    // Create an image representing the dragged item
-                    _image = new GameObject("DraggedItem").AddComponent<Image>();
-                    _image.raycastTarget = false;
-                    _image.transform.SetParent(_canvasTransform);
-                    _image.transform.SetAsLastSibling();
-                    _image.transform.localScale = Vector3.one;
-                    _image.sprite = item.Sprite;
-                    _image.SetNativeSize();
-                }
-
-                /// <summary>
-                /// Gets or sets the position of this dragged item
-                /// </summary>
-                public Vector2 Position
-                {
-                    get { return _image.rectTransform.position; }
-                    set
-                    {
-                        // Move the image
-                        _image.rectTransform.localPosition = (value - (_canvasTransform.sizeDelta * 0.5f)) + _offset;
-
-                        // Make selections
-                        if (CurrentController != null)
-                        {
-                            _draggedItem.Item.Shape.Position = CurrentController.ScreenToGrid(value + _offset + CurrentController.GetDraggedItemOffset(_draggedItem.Item));
-                            var canAdd = CurrentController._inventory.CanAddAt(_draggedItem.Item, _draggedItem.Item.Shape.Position);
-                            CurrentController._renderer.SelectItem(_draggedItem.Item, !canAdd, Color.white);
-                        }
-
-                        // Slowly animate the item towards the center of the mouse pointer
-                        _offset = Vector2.Lerp(_offset, Vector2.zero, Time.deltaTime * 10f);
-                    }
-                }
-
-                /// <summary>
-                /// Drop this item at the given position
-                /// </summary>
-                /// <param name="position">The position at which to drop the item</param>
-                public void Drop(Vector2 position)
-                {
-                    if (CurrentController != null)
-                    {
-                        var grid = CurrentController.ScreenToGrid(position + _offset + CurrentController.GetDraggedItemOffset(Item));
-                        if (CurrentController._inventory.CanAddAt(Item, grid))
-                        {
-                            CurrentController._inventory.AddAt(Item, grid); // Place the item in a new location
-                        }
-                        else
-                        {
-                            OriginalController._inventory.AddAt(Item, OriginPoint); // Return the item to its previous location
-                        }
-                        CurrentController._renderer.ClearSelection();
-                    }
-                    else
-                    {
-                        OriginalController._inventory.Drop(_draggedItem.Item); // Drop the item
-                    }
-
-                    // Destroy the image representing the item
-                    GameObject.Destroy(_image.gameObject);
-                }
             }
         }
 }

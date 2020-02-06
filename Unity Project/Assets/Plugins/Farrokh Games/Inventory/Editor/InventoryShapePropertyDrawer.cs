@@ -9,7 +9,7 @@ namespace FarrokhGames.Inventory
     [CustomPropertyDrawer(typeof(InventoryShape))]
     public class InventoryShapePropertyDrawer : PropertyDrawer
     {
-        const int GRID_SIZE = 16; // The size between the boold-fields that make up the shape matrix
+        const int GridSize = 16; // The size between the boold-fields that make up the shape matrix
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -34,8 +34,8 @@ namespace FarrokhGames.Inventory
 
             // Calculate rects
             var halfWidth = position.width / 2;
-            var widthRect = new Rect(position.x, position.y, halfWidth, GRID_SIZE);
-            var heightRect = new Rect(position.x + halfWidth, position.y, halfWidth, GRID_SIZE);
+            var widthRect = new Rect(position.x, position.y, halfWidth, GridSize);
+            var heightRect = new Rect(position.x + halfWidth, position.y, halfWidth, GridSize);
 
             // Width & Height
             EditorGUIUtility.labelWidth = 40;
@@ -51,7 +51,7 @@ namespace FarrokhGames.Inventory
                 for (var y = 0; y < height; y++)
                 {
                     var index = x + width * y;
-                    var rect = new Rect(position.x + (x * GRID_SIZE), position.y + GRID_SIZE + (y * GRID_SIZE), GRID_SIZE, GRID_SIZE);
+                    var rect = new Rect(position.x + (x * GridSize), position.y + GridSize + (y * GridSize), GridSize, GridSize);
                     EditorGUI.PropertyField(rect, pShape.GetArrayElementAtIndex(index), GUIContent.none);
                 }
             }
@@ -66,7 +66,7 @@ namespace FarrokhGames.Inventory
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             float height = EditorGUI.GetPropertyHeight(property, label);
-            height += property.FindPropertyRelative("_height").intValue * GRID_SIZE;
+            height += property.FindPropertyRelative("_height").intValue * GridSize;
             return height;
         }
     }
