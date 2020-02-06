@@ -1,6 +1,6 @@
 ## A Diablo 2-style inventory system for Unity3D
 
-<img src="Documentation/inventory1.gif?raw=true" alt="Zenject" width="640px" height="512px"/>
+<img src="Documentation/inventory1.gif?raw=true" alt="The Inventory" width="640px" height="512px"/>
 
 ## Table of Contents
 - <a href="#features">Features</a>
@@ -20,11 +20,13 @@
 ## <a id="features"></a>Features
 - ```Resize``` at runtime, dropping what no longer fits.
 - ```Add/Remove``` and check if an item fits from code.
+- ```Equipment slots``` for all your RPG needs.
 - ```Custom shapes``` for each item.
 - Rearrange items by ```draggin and dropping```, with visual feedback.
 - ```Move items between inventories```.
 - Remove items by ```dropping``` them outside the inventory.
 - Easily add ```custom graphics``` and change the size of your inventory.
+- Supports ```scaled canvases```.
 - Tested thoroughly with over ```75 Unit Tests```, and profiled using the Unity Profiler.
 - Tested using all types of ```Canvas render modes``` (Screen Space Overlay, Screen Space Camera and World Space)
 
@@ -67,121 +69,130 @@ Below is a list of actions methods and getters within ```InventoryManager.cs```.
 /// <summary>
 /// Invoked when an item is added to the inventory
 /// </summary>
-public Action<IInventoryItem> OnItemAdded;
+Action<IInventoryItem> onItemAdded { get; set; }
 
 /// <summary>
 /// Invoked when an item is removed to the inventory
 /// </summary>
-public Action<IInventoryItem> OnItemRemoved;
+Action<IInventoryItem> onItemRemoved { get; set; }
 
 /// <summary>
 /// Invoked when an item is removed from the inventory and should be placed on the ground.
 /// </summary>
-public Action<IInventoryItem> OnItemDropped;
+Action<IInventoryItem> onItemDropped { get; set; }
 
 /// <summary>
-/// Invoked when the inventory is cleared.
+/// Invoked when the inventory is rebuilt from scratch
 /// </summary>
-public Action OnCleared;
+Action onRebuilt { get; set; }
 
 /// <summary>
-/// Invoked when the inventory is resized.
+/// Invoked when the inventory changes its size
 /// </summary>
-public Action OnResized;
+Action onResized { get; set; }
 
 /// <summary>
-/// Returns the width of this inventory (readonly)
+/// The width of the inventory
 /// </summary>
-public int Width;
+int width { get; }
 
 /// <summary>
-/// Returns the height of this inventory (readonly)
+/// The height of the inventory
 /// </summary>
-public int Height;
+int height { get; }
 
 /// <summary>
-/// Returns a list of all items within this inventory
+/// Sets a new width and height of the inventory
 /// </summary>
-public List<IInventoryItem> AllItems;
+void Resize(int width, int height);
 
 /// <summary>
-/// Returns true of given item is within this inventory
+/// Returns all items inside this inventory
 /// </summary>
-/// <param name="item">Item to look for</param>
-public bool Contains(IInventoryItem item);
+IInventoryItem[] allItems { get; }
+
+/// <summary>
+/// Returns true if given item is present in this inventory
+/// </summary>
+bool Contains(IInventoryItem item);
 
 /// <summary>
 /// Returns true if this inventory is full
 /// </summary>
-public bool IsFull;
+bool isFull { get; }
 
 /// <summary>
-/// Returns true if its possible to add given item.
+/// Returns true if its possible to add given item
 /// </summary>
-/// <param name="item">Item to check</param>
-public bool CanAdd(IInventoryItem item);
+bool CanAdd(IInventoryItem item);
 
 /// <summary>
-/// Add given item to the inventory
+/// Add given item to the inventory. Returns true
+/// if successful
 /// </summary>
-/// <param name="item">Item to add</param>
-public void Add(IInventoryItem item);
-/// <summary>
-
-/// Returns true if its possible to add given item at given point within this inventory
-/// </summary>
-/// <param name="item">Item to check</param>
-/// <param name="point">Point at which to check</param>
-public bool CanAddAt(IInventoryItem item, Vector2Int point);
+bool TryAdd(IInventoryItem item);
 
 /// <summary>
-/// Add given item at point within inventory
+/// Returns true if its possible to add item at location
 /// </summary>
-/// <param name="item">Item to add</param>
-/// <param name="Point">Point at which to add item</param>
-public void AddAt(IInventoryItem item, Vector2Int Point);
+bool CanAddAt(IInventoryItem item, Vector2Int point);
 
 /// <summary>
-/// Returns true if its possible to remove given item
+/// Tries to add item att location and returns true if successful
 /// </summary>
-/// <param name="item">Item to check</param>
-public bool CanRemove(IInventoryItem item);
+bool TryAddAt(IInventoryItem item, Vector2Int point);
 
 /// <summary>
-/// Removes given item from this inventory
+/// Returns true if its possible to remove this item
 /// </summary>
-/// <param name="item">Item to remove</param>
-public void Remove(IInventoryItem item);
+bool CanRemove(IInventoryItem item);
 
 /// <summary>
-/// Removes an item from this inventory and invokes OnItemDropped
+/// Returns true ifits possible to swap this item
 /// </summary>
-/// <param name="item"></param>
-public void Drop(IInventoryItem item);
+bool CanSwap(IInventoryItem item);
 
 /// <summary>
-/// Drops all items in this inventory
+/// Removes given item from this inventory. Returns
+/// true if successful.
 /// </summary>
-public void DropAll();
+bool TryRemove(IInventoryItem item);
+
+/// <summary>
+/// Returns true if its possible to drop this item
+/// </summary>
+bool CanDrop(IInventoryItem item);
+
+/// <summary>
+/// Removes an item from this inventory. Returns true
+/// if successful.
+/// </summary>
+bool TryDrop(IInventoryItem item);
+
+/// <summary>
+/// Drops all items from this inventory
+/// </summary>
+void DropAll();
 
 /// <summary>
 /// Clears (destroys) all items in this inventory
 /// </summary>
-public void Clear();
+void Clear();
+
+/// <summary>
+/// Rebuilds the inventory
+/// </summary>
+void Rebuild();
 
 /// <summary>
 /// Get an item at given point within this inventory
 /// </summary>
-/// <param name="point">Point at which to look for item</param>
-public IInventoryItem GetAtPoint(Vector2Int point);
+IInventoryItem GetAtPoint(Vector2Int point);
 
 /// <summary>
-/// Resize the inventory
-/// Items that no longer fit will be dropped.
+/// Returns all items under given rectangle
 /// </summary>
-/// <param name="newWidth">The new width</param>
-/// <param name="newHeight">The new height</param>
-public void Resize(int newWidth, int newHeight);
+IInventoryItem[] GetAtPoint(Vector2Int point, Vector2Int size);
 ```
 ---
 
@@ -255,7 +266,7 @@ Besides the actual inventory, there are suppor-classes included in the reposetor
 ## <a id="license"></a>License
     MIT License
 
-    Copyright (c) 2017 Farrokh Games
+    Copyright (c) 2020 Farrokh Games
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
