@@ -16,19 +16,19 @@ namespace FarrokhGames.Inventory
         private Vector2Int _cellSize = new Vector2Int(32, 32);
 
         [SerializeField, Tooltip("The sprite to use for empty cells")]
-        private Sprite _cellSpriteEmpty = null;
+        private Sprite _cellSpriteEmpty;
 
         [SerializeField, Tooltip("The sprite to use for selected cells")]
-        private Sprite _cellSpriteSelected = null;
+        private Sprite _cellSpriteSelected;
 
         [SerializeField, Tooltip("The sprite to use for blocked cells")]
-        private Sprite _cellSpriteBlocked = null;
+        private Sprite _cellSpriteBlocked;
 
-        internal IInventoryManager _inventory = null;
+        internal IInventoryManager inventory;
         InventoryRenderMode _renderMode;
-        private bool _haveListeners = false;
+        private bool _haveListeners;
         private Pool<Image> _imagePool;
-        private Image[] _grids = null;
+        private Image[] _grids;
         private Dictionary<IInventoryItem, Image> _items = new Dictionary<IInventoryItem, Image>();
 
         /*
@@ -36,7 +36,7 @@ namespace FarrokhGames.Inventory
          */
         void Awake()
         {
-            RectTransform = GetComponent<RectTransform>();
+            rectTransform = GetComponent<RectTransform>();
 
             // Create the image container
             var imageContainer = new GameObject("Image Pool").AddComponent<RectTransform>();
@@ -52,20 +52,16 @@ namespace FarrokhGames.Inventory
                     image.transform.SetParent(imageContainer);
                     image.transform.localScale = Vector3.one;
                     return image;
-                },
-                0,
-                true);
+                });
         }
 
         /// <summary>
         /// Set what inventory to use when rendering
         /// </summary>
-        /// <param name="inventory">Inventory to use</param>
-        public void SetInventory(IInventoryManager inventory, InventoryRenderMode renderMode)
+        public void SetInventory(IInventoryManager inventoryManager, InventoryRenderMode renderMode)
         {
-            if (inventory == null) { throw new ArgumentNullException("inventory"); }
             OnDisable();
-            _inventory = inventory;
+            inventory = inventoryManager ?? throw new ArgumentNullException(nameof(inventoryManager)); 
             _renderMode = renderMode;
             OnEnable();
         }
@@ -73,49 +69,49 @@ namespace FarrokhGames.Inventory
         /// <summary>
         /// Returns the RectTransform for this renderer
         /// </summary>
-        public RectTransform RectTransform { get; private set; }
+        public RectTransform rectTransform { get; private set; }
 
         /// <summary>
         /// Returns the size of this inventory's cells
         /// </summary>
-        public Vector2 CellSize { get { return _cellSize; } }
+        public Vector2 cellSize => _cellSize;
 
         /* 
-        Invoked when the Inventory Renderer is enabled
+        Invoked when the inventory inventoryRenderer is enabled
         */
         void OnEnable()
         {
-            if (_inventory != null && !_haveListeners)
+            if (inventory != null && !_haveListeners)
             {
-                if (_cellSpriteEmpty == null) { throw new ArgumentNullException("Sprite for empty cell is null."); }
-                if (_cellSpriteSelected == null) { throw new ArgumentNullException("Sprite for selected cells is null."); }
-                if (_cellSpriteBlocked == null) { throw new ArgumentNullException("Sprite for blocked cells is null."); }
+                if (_cellSpriteEmpty == null) { throw new NullReferenceException("Sprite for empty cell is null"); }
+                if (_cellSpriteSelected == null) { throw new NullReferenceException("Sprite for selected cells is null."); }
+                if (_cellSpriteBlocked == null) { throw new NullReferenceException("Sprite for blocked cells is null."); }
 
-                _inventory.OnRebuilt += ReRenderAllItems;
-                _inventory.OnItemAdded += HandleItemAdded;
-                _inventory.OnItemRemoved += HandleItemRemoved;
-                _inventory.OnItemDropped += HandleItemRemoved;
-                _inventory.OnResized += HandleResized;
+                inventory.onRebuilt += ReRenderAllItems;
+                inventory.onItemAdded += HandleItemAdded;
+                inventory.onItemRemoved += HandleItemRemoved;
+                inventory.onItemDropped += HandleItemRemoved;
+                inventory.onResized += HandleResized;
                 _haveListeners = true;
 
-                // Render Inventory
+                // Render inventory
                 ReRenderGrid();
                 ReRenderAllItems();
             }
         }
 
         /* 
-        Invoked when the Inventory Renderer is disabled
+        Invoked when the inventory inventoryRenderer is disabled
         */
         void OnDisable()
         {
-            if (_inventory != null && _haveListeners)
+            if (inventory != null && _haveListeners)
             {
-                _inventory.OnRebuilt -= ReRenderAllItems;
-                _inventory.OnItemAdded -= HandleItemAdded;
-                _inventory.OnItemRemoved -= HandleItemRemoved;
-                _inventory.OnItemDropped -= HandleItemRemoved;
-                _inventory.OnResized -= HandleResized;
+                inventory.onRebuilt -= ReRenderAllItems;
+                inventory.onItemAdded -= HandleItemAdded;
+                inventory.onItemRemoved -= HandleItemRemoved;
+                inventory.onItemDropped -= HandleItemRemoved;
+                inventory.onResized -= HandleResized;
                 _haveListeners = false;
             }
         }
@@ -138,7 +134,7 @@ namespace FarrokhGames.Inventory
             _grids = null;
 
             // Render new grid
-            var containerSize = new Vector2(CellSize.x * _inventory.Width, CellSize.y * _inventory.Height);
+            var containerSize = new Vector2(cellSize.x * inventory.width, cellSize.y * inventory.height);
             Image grid;
             switch (_renderMode)
             {
@@ -148,24 +144,24 @@ namespace FarrokhGames.Inventory
                     grid.type = Image.Type.Sliced;
                     grid.rectTransform.localPosition = Vector3.zero;
                     grid.rectTransform.sizeDelta = containerSize;
-                    _grids = new Image[] { grid };
+                    _grids = new[] { grid };
                     break;
                 default:
                     // Spawn grid images
                     var topLeft = new Vector3(-containerSize.x / 2, -containerSize.y / 2, 0); // Calculate topleft corner
-                    var halfCellSize = new Vector3(CellSize.x / 2, CellSize.y / 2, 0); // Calulcate cells half-size
-                    _grids = new Image[_inventory.Width * _inventory.Height];
+                    var halfCellSize = new Vector3(cellSize.x / 2, cellSize.y / 2, 0); // Calulcate cells half-size
+                    _grids = new Image[inventory.width * inventory.height];
                     var c = 0;
-                    for (int y = 0; y < _inventory.Height; y++)
+                    for (int y = 0; y < inventory.height; y++)
                     {
-                        for (int x = 0; x < _inventory.Width; x++)
+                        for (int x = 0; x < inventory.width; x++)
                         {
                             grid = CreateImage(_cellSpriteEmpty, true);
                             grid.gameObject.name = "Grid " + c;
                             grid.rectTransform.SetAsFirstSibling();
                             grid.type = Image.Type.Sliced;
-                            grid.rectTransform.localPosition = topLeft + new Vector3(CellSize.x * ((_inventory.Width - 1) - x), CellSize.y * y, 0) + halfCellSize;
-                            grid.rectTransform.sizeDelta = CellSize;
+                            grid.rectTransform.localPosition = topLeft + new Vector3(cellSize.x * ((inventory.width - 1) - x), cellSize.y * y, 0) + halfCellSize;
+                            grid.rectTransform.sizeDelta = cellSize;
                             _grids[c] = grid;
                             c++;
                         }
@@ -176,7 +172,7 @@ namespace FarrokhGames.Inventory
             // Set the size of the main RectTransform
             // This is useful as it allowes custom graphical elements
             // suchs as a border to mimic the size of the inventory.
-            RectTransform.sizeDelta = containerSize;
+            rectTransform.sizeDelta = containerSize;
         }
 
         /*
@@ -193,22 +189,22 @@ namespace FarrokhGames.Inventory
             _items.Clear();
 
             // Add all items
-            foreach (var item in _inventory.AllItems)
+            foreach (var item in inventory.allItems)
             {
                 HandleItemAdded(item);
             }
         }
 
         /*
-        Handler for when Inventory.OnItemAdded is invoked
+        Handler for when inventory.OnItemAdded is invoked
         */
         private void HandleItemAdded(IInventoryItem item)
         {
-            var img = CreateImage(item.Sprite, false);
+            var img = CreateImage(item.sprite, false);
 
             if (_renderMode == InventoryRenderMode.Single)
             {
-                img.rectTransform.localPosition = RectTransform.rect.center;
+                img.rectTransform.localPosition = rectTransform.rect.center;
             }
             else
             {
@@ -219,7 +215,7 @@ namespace FarrokhGames.Inventory
         }
 
         /*
-        Handler for when Inventory.OnItemRemoved is invoked
+        Handler for when inventory.OnItemRemoved is invoked
         */
         private void HandleItemRemoved(IInventoryItem item)
         {
@@ -233,7 +229,7 @@ namespace FarrokhGames.Inventory
         }
 
         /*
-        Handler for when Inventory.OnResized is invoked
+        Handler for when inventory.OnResized is invoked
         */
         private void HandleResized()
         {
@@ -284,16 +280,16 @@ namespace FarrokhGames.Inventory
                     _grids[0].color = color;
                     break;
                 default:
-                    for (var x = 0; x < item.Width; x++)
+                    for (var x = 0; x < item.width; x++)
                     {
-                        for (var y = 0; y < item.Height; y++)
+                        for (var y = 0; y < item.height; y++)
                         {
                             if (item.IsPartOfShape(new Vector2Int(x, y)))
                             {
-                                var p = item.Position + new Vector2Int(x, y);
-                                if (p.x >= 0 && p.x < _inventory.Width && p.y >= 0 && p.y < _inventory.Height)
+                                var p = item.position + new Vector2Int(x, y);
+                                if (p.x >= 0 && p.x < inventory.width && p.y >= 0 && p.y < inventory.height)
                                 {
-                                    var index = p.y * _inventory.Width + ((_inventory.Width - 1) - p.x);
+                                    var index = p.y * inventory.width + ((inventory.width - 1) - p.x);
                                     _grids[index].sprite = blocked ? _cellSpriteBlocked : _cellSpriteSelected;
                                     _grids[index].color = color;
                                 }
@@ -321,8 +317,8 @@ namespace FarrokhGames.Inventory
         */
         internal Vector2 GetItemOffset(IInventoryItem item)
         {
-            var x = (-(_inventory.Width * 0.5f) + item.Position.x + ((float)item.Width * 0.5f)) * CellSize.x;
-            var y = (-(_inventory.Height * 0.5f) + item.Position.y + ((float)item.Height * 0.5f)) * CellSize.y;
+            var x = (-(inventory.width * 0.5f) + item.position.x + item.width * 0.5f) * cellSize.x;
+            var y = (-(inventory.height * 0.5f) + item.position.y + item.height * 0.5f) * cellSize.y;
             return new Vector2(x, y);
         }
     }

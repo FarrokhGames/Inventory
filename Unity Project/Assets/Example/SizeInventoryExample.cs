@@ -44,10 +44,10 @@ namespace FarrokhGames.Inventory.Examples
             }
 
             // Sets the renderers's inventory to trigger drawing
-            GetComponent<InventoryRenderer>().SetInventory(inventory, provider.InventoryRenderMode);
+            GetComponent<InventoryRenderer>().SetInventory(inventory, provider.inventoryRenderMode);
 
             // Log items being dropped on the ground
-            inventory.OnItemDropped += (item) =>
+            inventory.onItemDropped += (item) =>
             {
                 Debug.Log((item as ItemDefinition).Name + " was dropped on the ground");
             };

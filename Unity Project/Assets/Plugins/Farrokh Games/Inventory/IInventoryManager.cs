@@ -8,39 +8,57 @@ namespace FarrokhGames.Inventory
         /// <summary>
         /// Invoked when an item is added to the inventory
         /// </summary>
-        Action<IInventoryItem> OnItemAdded { get; set; }
+        Action<IInventoryItem> onItemAdded { get; set; }
 
         /// <summary>
         /// Invoked when an item is removed to the inventory
         /// </summary>
-        Action<IInventoryItem> OnItemRemoved { get; set; }
+        Action<IInventoryItem> onItemRemoved { get; set; }
 
         /// <summary>
         /// Invoked when an item is removed from the inventory and should be placed on the ground.
         /// </summary>
-        Action<IInventoryItem> OnItemDropped { get; set; }
+        Action<IInventoryItem> onItemDropped { get; set; }
 
         /// <summary>
         /// Invoked when the inventory is rebuilt from scratch
         /// </summary>
-        Action OnRebuilt { get; set; }
+        Action onRebuilt { get; set; }
 
-        Action OnResized { get; set; }
+        /// <summary>
+        /// Invoked when the inventory changes its size
+        /// </summary>
+        Action onResized { get; set; }
 
-        int Width { get; }
+        /// <summary>
+        /// The width of the inventory
+        /// </summary>
+        int width { get; }
 
-        int Height { get; }
+        /// <summary>
+        /// The height of the inventory
+        /// </summary>
+        int height { get; }
 
+        /// <summary>
+        /// Sets a new width and height of the inventory
+        /// </summary>
         void Resize(int width, int height);
 
-        IInventoryItem[] AllItems { get; }
+        /// <summary>
+        /// Returns all items inside this inventory
+        /// </summary>
+        IInventoryItem[] allItems { get; }
 
+        /// <summary>
+        /// Returns true if given item is present in this inventory
+        /// </summary>
         bool Contains(IInventoryItem item);
 
         /// <summary>
         /// Returns true if this inventory is full
         /// </summary>
-        bool IsFull { get; }
+        bool isFull { get; }
 
         /// <summary>
         /// Returns true if its possible to add given item
@@ -53,12 +71,24 @@ namespace FarrokhGames.Inventory
         /// </summary>
         bool TryAdd(IInventoryItem item);
 
+        /// <summary>
+        /// Returns true if its possible to add item at location
+        /// </summary>
         bool CanAddAt(IInventoryItem item, Vector2Int point);
 
-        bool TryAddAt(IInventoryItem item, Vector2Int Point);
+        /// <summary>
+        /// Tries to add item att location and returns true if successful
+        /// </summary>
+        bool TryAddAt(IInventoryItem item, Vector2Int point);
 
+        /// <summary>
+        /// Returns true if its possible to remove this item
+        /// </summary>
         bool CanRemove(IInventoryItem item);
 
+        /// <summary>
+        /// Returns true ifits possible to swap this item
+        /// </summary>
         bool CanSwap(IInventoryItem item);
 
         /// <summary>
@@ -67,6 +97,9 @@ namespace FarrokhGames.Inventory
         /// </summary>
         bool TryRemove(IInventoryItem item);
 
+        /// <summary>
+        /// Returns true if its possible to drop this item
+        /// </summary>
         bool CanDrop(IInventoryItem item);
 
         /// <summary>
@@ -85,6 +118,9 @@ namespace FarrokhGames.Inventory
         /// </summary>
         void Clear();
 
+        /// <summary>
+        /// Rebuilds the inventory
+        /// </summary>
         void Rebuild();
 
         /// <summary>

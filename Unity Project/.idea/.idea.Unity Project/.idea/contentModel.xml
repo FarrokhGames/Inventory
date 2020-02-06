@@ -18,6 +18,7 @@
         <e p="Plugins" t="Include">
           <e p="Farrokh Games" t="Include">
             <e p="Inventory" t="Include">
+              <e p="DraggedItem.cs" t="Include" />
               <e p="Editor" t="Include">
                 <e p="InventoryShapePropertyDrawer.cs" t="Include" />
                 <e p="Tests" t="Include">

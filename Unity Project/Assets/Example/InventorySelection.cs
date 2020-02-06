@@ -16,7 +16,7 @@ namespace FarrokhGames.Inventory.Examples
 
             foreach (var controller in allControllers)
             {
-                controller.OnItemHovered += HandleItemHover;
+                controller.onItemHovered += HandleItemHover;
             }
         }
 

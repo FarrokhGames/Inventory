@@ -14,7 +14,7 @@ namespace FarrokhGames.Inventory
         [SerializeField] bool[] _shape;
 
         /// <summary>
-        /// Constructor
+        /// CTOR
         /// </summary>
         /// <param name="width">The maximum width of the shape</param>
         /// <param name="height">The maximum height of the shape</param>
@@ -46,17 +46,16 @@ namespace FarrokhGames.Inventory
         /// <summary>
         /// Returns the width of the shapes bounding box
         /// </summary>
-        public int Width { get { return _width; } }
+        public int width => _width;
 
         /// <summary>
         /// Returns the height of the shapes bounding box
         /// </summary>
-        public int Height { get { return _height; } }
+        public int height => _height;
 
         /// <summary>
         /// Returns true if given local point is part of this shape
         /// </summary>
-        /// <param name="point">The point to check</param>
         public bool IsPartOfShape(Vector2Int localPoint)
         {
             if (localPoint.x < 0 || localPoint.x >= _width || localPoint.y < 0 || localPoint.y >= _height)

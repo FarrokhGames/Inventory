@@ -16,27 +16,27 @@ namespace FarrokhGames.Inventory.Examples
         /// <summary>
         /// The name of the item
         /// </summary>
-        public string Name { get { return this.name; } }
+        public string Name => this.name;
 
         /// <summary>
         /// The type of the item
         /// </summary>
-        public ItemType Type { get { return _type; } }
+        public ItemType Type => _type;
 
         /// <inheritdoc />
-        public Sprite Sprite { get { return _sprite; } }
+        public Sprite sprite => _sprite;
 
         /// <inheritdoc />
-        public int Width { get { return _shape.Width; } }
+        public int width => _shape.width;
 
         /// <inheritdoc />
-        public int Height { get { return _shape.Height; } }
+        public int height => _shape.height;
 
         /// <inheritdoc />
-        public Vector2Int Position
+        public Vector2Int position
         {
-            get { return _position; }
-            set { _position = value; }
+            get => _position;
+            set => _position = value;
         }
 
         /// <inheritdoc />

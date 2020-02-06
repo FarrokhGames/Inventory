@@ -1,5 +1,3 @@
-using System;
-
 namespace FarrokhGames.Inventory
 {
     /// <summary>
@@ -10,18 +8,18 @@ namespace FarrokhGames.Inventory
         /// <summary>
         /// Returns the render mode of this inventory
         /// </summary>
-        InventoryRenderMode InventoryRenderMode { get; }
+        InventoryRenderMode inventoryRenderMode { get; }
 
         /// <summary>
         /// Returns the total amount of inventory items in 
         /// this inventory
         /// </summary>
-        int InventoryItemCount { get; }
+        int inventoryItemCount { get; }
 
         /// <summary>
         /// Returns true if the inventory is full
         /// </summary>
-        bool IsInventoryFull { get; }
+        bool isInventoryFull { get; }
 
         /// <summary>
         /// Returns the inventory item at given index

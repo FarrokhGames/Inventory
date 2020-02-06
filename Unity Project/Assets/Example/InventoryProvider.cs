@@ -14,21 +14,21 @@ namespace FarrokhGames.Inventory.Examples
         /// </summary>
         public InventoryProvider(InventoryRenderMode renderMode, int maximumAlowedItemCount = -1, ItemType allowedItem = ItemType.Any)
         {
-            InventoryRenderMode = renderMode;
+            inventoryRenderMode = renderMode;
             _maximumAlowedItemCount = maximumAlowedItemCount;
             _allowedItem = allowedItem;
         }
 
-        public int InventoryItemCount { get { return _items.Count; } }
+        public int inventoryItemCount => _items.Count;
 
-        public InventoryRenderMode InventoryRenderMode { get; private set; }
+        public InventoryRenderMode inventoryRenderMode { get; private set; }
 
-        public bool IsInventoryFull
+        public bool isInventoryFull
         {
             get
             {
                 if (_maximumAlowedItemCount < 0)return false;
-                return InventoryItemCount >= _maximumAlowedItemCount;
+                return inventoryItemCount >= _maximumAlowedItemCount;
             }
         }
 

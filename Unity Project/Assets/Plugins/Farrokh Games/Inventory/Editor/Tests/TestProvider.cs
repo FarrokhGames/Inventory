@@ -4,69 +4,43 @@ namespace FarrokhGames.Inventory
 {
     public class TestProvider : IInventoryProvider
     {
-        private List<IInventoryItem> _items = new List<IInventoryItem>();
-        private int _maximumAlowedItemCount;
+        private readonly List<IInventoryItem> _items = new List<IInventoryItem>();
+        private readonly int _maximumAlowedItemCount;
 
         /// <summary>
         /// CTOR
         /// </summary>
         public TestProvider(InventoryRenderMode renderMode = InventoryRenderMode.Grid, int maximumAlowedItemCount = -1)
         {
-            InventoryRenderMode = renderMode;
+            inventoryRenderMode = renderMode;
             _maximumAlowedItemCount = maximumAlowedItemCount;
         }
 
-        public int InventoryItemCount { get { return _items.Count; } }
+        public int inventoryItemCount => _items.Count;
 
-        public InventoryRenderMode InventoryRenderMode { get; private set; }
+        public InventoryRenderMode inventoryRenderMode { get; }
 
-        public bool IsInventoryFull
+        public bool isInventoryFull
         {
             get
             {
-                if (_maximumAlowedItemCount < 0)return false;
-                return InventoryItemCount < _maximumAlowedItemCount;
+                if (_maximumAlowedItemCount < 0) return false;
+                return inventoryItemCount < _maximumAlowedItemCount;
             }
         }
 
         public bool AddInventoryItem(IInventoryItem item)
         {
-            if (!_items.Contains(item))
-            {
-                _items.Add(item);
-                return true;
-            }
-            return false;
-        }
-
-        public bool DropInventoryItem(IInventoryItem item)
-        {
-            return RemoveInventoryItem(item);
-        }
-
-        public IInventoryItem GetInventoryItem(int index)
-        {
-            return _items[index];
-        }
-
-        public bool CanAddInventoryItem(IInventoryItem item)
-        {
+            if (_items.Contains(item)) return false;
+            _items.Add(item);
             return true;
         }
 
-        public bool CanRemoveInventoryItem(IInventoryItem item)
-        {
-            return true;
-        }
-
-        public bool CanDropInventoryItem(IInventoryItem item)
-        {
-            return true;
-        }
-
-        public bool RemoveInventoryItem(IInventoryItem item)
-        {
-            return _items.Remove(item);
-        }
+        public bool DropInventoryItem(IInventoryItem item) => RemoveInventoryItem(item);
+        public IInventoryItem GetInventoryItem(int index) => _items[index];
+        public bool CanAddInventoryItem(IInventoryItem item) => true;
+        public bool CanRemoveInventoryItem(IInventoryItem item) => true;
+        public bool CanDropInventoryItem(IInventoryItem item) => true;
+        public bool RemoveInventoryItem(IInventoryItem item) => _items.Remove(item);
     }
 }

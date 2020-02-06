@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using FarrokhGames.Shared;
-using NUnit.Framework;
-using UnityEngine;
+﻿using NUnit.Framework;
 
 namespace FarrokhGames.Inventory
 {
@@ -13,8 +10,8 @@ namespace FarrokhGames.Inventory
         {
             var shape = new InventoryShape(8, 12);
 
-            Assert.That(shape.Width, Is.EqualTo(8));
-            Assert.That(shape.Height, Is.EqualTo(12));
+            Assert.That(shape.width, Is.EqualTo(8));
+            Assert.That(shape.height, Is.EqualTo(12));
         }
 
         /*
