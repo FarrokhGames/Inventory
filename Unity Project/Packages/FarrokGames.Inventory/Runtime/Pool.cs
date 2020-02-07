@@ -11,7 +11,7 @@ namespace FarrokhGames.Shared
 	/// has to be manually reset after retrieval from the pool. Its constructor will
 	/// not be run again after the first time!
     /// </summary>
-    public class Pool<T> where T : class
+    public sealed class Pool<T> where T : class
     {
         private List<T> _inactive = new List<T>();
         private List<T> _active = new List<T>();

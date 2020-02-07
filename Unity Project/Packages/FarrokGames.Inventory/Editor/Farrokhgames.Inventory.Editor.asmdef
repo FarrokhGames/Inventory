@@ -1,0 +1,17 @@
+{
+    "name": "Farrokhgames.Inventory.Editor",
+    "references": [
+        "Farrokhgames.Inventory"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
