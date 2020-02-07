@@ -33,7 +33,7 @@
 ---
 
 ## <a id="installation"></a>Installation
-PSimply copy the folder "```Packages/FarrokGames.Inventory```" into your own projects packages folder and you're good to go. Optionally, you can add the folder "```Assets/Example```" to get started right away.
+Simply copy the folder "```Packages/FarrokGames.Inventory```" into your own projects packages folder and you're good to go. Optionally, you can add the folder "```Assets/Example```" to get started right away.
 
 ---
 
