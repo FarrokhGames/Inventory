@@ -25,7 +25,7 @@ namespace FarrokhGames.Inventory
         {
             // The dragged item is static and shared by all controllers
             // This way items can be moved between controllers easily
-            private static DraggedItem _draggedItem;
+            private static InventoryDraggedItem _draggedItem;
 
             /// <inheritdoc />
             public Action<IInventoryItem> onItemHovered { get; set; }
@@ -92,7 +92,7 @@ namespace FarrokhGames.Inventory
                 var offset = itemOffest - localPosition;
 
                 // Create a dragged item 
-                _draggedItem = new DraggedItem(
+                _draggedItem = new InventoryDraggedItem(
                     _canvas,
                     this,
                     _itemToDrag.position,
@@ -130,16 +130,16 @@ namespace FarrokhGames.Inventory
 
                 switch (mode)
                 {
-                    case DraggedItem.DropMode.Added:
+                    case InventoryDraggedItem.DropMode.Added:
                         onItemAdded?.Invoke(_itemToDrag);
                         break;
-                    case DraggedItem.DropMode.Swapped:
+                    case InventoryDraggedItem.DropMode.Swapped:
                         onItemSwapped?.Invoke(_itemToDrag);
                         break;
-                    case DraggedItem.DropMode.Returned:
+                    case InventoryDraggedItem.DropMode.Returned:
                         onItemReturned?.Invoke(_itemToDrag);
                         break;
-                    case DraggedItem.DropMode.Dropped:
+                    case InventoryDraggedItem.DropMode.Dropped:
                         onItemDropped?.Invoke(_itemToDrag);
                         ClearHoveredItem();
                         break;
