@@ -1,0 +1,19 @@
+{
+    "name": "com.farrokhgames.inventory",
+    "version": "1.0.0",
+    "displayName": "Inventory",
+    "description": "A Diablo 2-style inventory system for Unity3D",
+    "unity": "2019.3",
+    "unityRelease": "0f6",
+    "dependencies": {},
+    "keywords": [
+      "inventory",
+      "diablo2",
+      "rpg"
+    ],
+    "author": {
+      "name": "FarrokhGames",
+      "email": "info@farrokhgames.com",
+      "url": "https://www.farrokhgames.com"
+    }
+  }

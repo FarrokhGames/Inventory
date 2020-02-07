@@ -33,7 +33,7 @@
 ---
 
 ## <a id="installation"></a>Installation
-Simply copy the folder "```Assets/Plugins```" into your project and you're good to go. Optionally, you can add the folder "```Assets/Example```" to get started right away.
+PSimply copy the folder "```Packages/FarrokGames.Inventory```" into your own projects packages folder and you're good to go. Optionally, you can add the folder "```Assets/Example```" to get started right away.
 
 ---
 
@@ -255,7 +255,7 @@ To enable interactions (drag and drop), add ```InventoryController.cs``` to the 
 ---
 
 ### <a id="otherfiles"></a>Other files included
-Besides the actual inventory, there are suppor-classes included in the reposetory.
+Besides the actual inventory, there are sipport-classes included in the reposetory.
 
 - ```Pool.cs``` - A generic pool of objects that can be retrieved and recycled without invoking additional allocations. Used by the ```Renderer``` to pool sprites.
 
