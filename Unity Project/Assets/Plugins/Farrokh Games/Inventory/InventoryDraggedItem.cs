@@ -7,7 +7,7 @@ namespace FarrokhGames.Inventory
     /// <summary>
     /// Class for keeping track of dragged items
     /// </summary>
-    public class DraggedItem
+    public class InventoryDraggedItem
     {
         public enum DropMode
         {
@@ -51,7 +51,7 @@ namespace FarrokhGames.Inventory
         /// <param name="item">The item-instance that is being dragged</param>
         /// <param name="offset">The starting offset of this item</param>
         [SuppressMessage("ReSharper", "Unity.InefficientPropertyAccess")]
-        public DraggedItem(
+        public InventoryDraggedItem(
             Canvas canvas,
             InventoryController originalController,
             Vector2Int originPoint,
@@ -86,7 +86,8 @@ namespace FarrokhGames.Inventory
             set
             {
                 // Move the image
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvasRect, value + _offset, _canvas.worldCamera,  out var newValue);
+                var camera = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvasRect, value + _offset, camera,  out var newValue);
                 _image.rectTransform.localPosition = newValue;
                 
                 

@@ -16,13 +16,13 @@ namespace FarrokhGames.Inventory
         private Vector2Int _cellSize = new Vector2Int(32, 32);
 
         [SerializeField, Tooltip("The sprite to use for empty cells")]
-        private Sprite _cellSpriteEmpty;
+        private Sprite _cellSpriteEmpty = null;
 
         [SerializeField, Tooltip("The sprite to use for selected cells")]
-        private Sprite _cellSpriteSelected;
+        private Sprite _cellSpriteSelected = null;
 
         [SerializeField, Tooltip("The sprite to use for blocked cells")]
-        private Sprite _cellSpriteBlocked;
+        private Sprite _cellSpriteBlocked = null;
 
         internal IInventoryManager inventory;
         InventoryRenderMode _renderMode;
