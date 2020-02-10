@@ -72,6 +72,11 @@ Below is a list of actions methods and getters within ```InventoryManager.cs```.
 Action<IInventoryItem> onItemAdded { get; set; }
 
 /// <summary>
+/// Invoked when an item was not able to be added to the inventory
+/// </summary>
+Action<IInventoryItem> onItemAddedFailed { get; set; }
+
+/// <summary>
 /// Invoked when an item is removed to the inventory
 /// </summary>
 Action<IInventoryItem> onItemRemoved { get; set; }
@@ -80,6 +85,11 @@ Action<IInventoryItem> onItemRemoved { get; set; }
 /// Invoked when an item is removed from the inventory and should be placed on the ground.
 /// </summary>
 Action<IInventoryItem> onItemDropped { get; set; }
+
+/// <summary>
+/// Invoked when an item was unable to be placed on the ground (most likely to its canDrop being set to false)
+/// </summary>
+Action<IInventoryItem> onItemDroppedFailed { get; set; }
 
 /// <summary>
 /// Invoked when the inventory is rebuilt from scratch
@@ -203,17 +213,19 @@ using UnityEngine;
 using FarrokhGames.Inventory;
 
 /// <summary>
-/// Scriptable Object representing an Inventory Item
+/// ScriptableObject representing an Inventory Item
 /// </summary>
 [CreateAssetMenu(fileName = "Item", menuName = "Inventory/Item", order = 1)]
 public class ItemDefinition : ScriptableObject, IInventoryItem
 {
     [SerializeField] private Sprite _sprite;
     [SerializeField] private InventoryShape _shape;
+    [SerializeField] private bool _canDrop;
 
-    public string Name { get { return this.name; } }
-    public Sprite Sprite { get { return _sprite; } }
-    public InventoryShape Shape { get { return _shape; } }
+    public string Name => return this.name;
+    public Sprite Sprite =>  return _sprite;
+    public InventoryShape Shape => _shape;
+    public bool canDrop => _canDrop;
 
     /// <summary>
     /// Creates a copy if this scriptable object

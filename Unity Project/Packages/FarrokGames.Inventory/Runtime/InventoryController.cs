@@ -47,7 +47,7 @@ namespace FarrokhGames.Inventory
 
             private Canvas _canvas;
             internal InventoryRenderer inventoryRenderer;
-            internal IInventoryManager inventory => inventoryRenderer.inventory;
+            internal InventoryManager inventory => (InventoryManager) inventoryRenderer.inventory;
 
             private IInventoryItem _itemToDrag;
             private PointerEventData _currentEventData;

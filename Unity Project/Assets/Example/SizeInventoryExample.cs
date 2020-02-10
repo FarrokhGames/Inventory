@@ -51,6 +51,18 @@ namespace FarrokhGames.Inventory.Examples
             {
                 Debug.Log((item as ItemDefinition).Name + " was dropped on the ground");
             };
+
+			// Log when an item was unable to be placed on the ground (due to its canDrop being set to false)
+            inventory.onItemDroppedFailed += (item) =>
+            {
+                Debug.Log($"You're not allowed to drop {(item as ItemDefinition).Name} on the ground");
+            };
+
+			// Log when an item was unable to be placed on the ground (due to its canDrop being set to false)
+            inventory.onItemAddedFailed += (item) =>
+            {
+                Debug.Log($"You can't put {(item as ItemDefinition).Name} there!");
+            };
         }
     }
 }

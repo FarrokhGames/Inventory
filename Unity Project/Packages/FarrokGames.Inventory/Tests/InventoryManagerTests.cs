@@ -8,7 +8,7 @@ namespace FarrokhGames.Inventory
     [TestFixture]
     public class InventoryManagerTests
     {
-        IInventoryItem CreateFullItem(int width, int height)
+        IInventoryItem CreateFullItem(int width, int height, bool canBeDropped = true)
         {
             var shape = new bool[width, height];
             for (var x = 0; x < width; x++)
@@ -18,7 +18,7 @@ namespace FarrokhGames.Inventory
                     shape[x, y] = true;
                 }
             }
-            return new TestItem(null, new InventoryShape(shape));
+            return new TestItem(null, new InventoryShape(shape), canBeDropped);
         }
 
         /*
@@ -243,9 +243,21 @@ namespace FarrokhGames.Inventory
         public void AddAt_ItemDoesNotFit_NoItemAdded()
         {
             var inventory = new InventoryManager(new TestProvider(), 2, 2);
+
+            var callbacks = 0;
+            IInventoryItem lastItem = null;
+            inventory.onItemAddedFailed += (i) =>
+            {
+                callbacks++;
+                lastItem = i;
+            };
+            
             var item = CreateFullItem(3, 3);
             inventory.TryAddAt(item, Vector2Int.zero);
             Assert.That(inventory.allItems.Count, Is.EqualTo(0));
+            
+            Assert.That(lastItem, Is.Not.Null);
+            Assert.That(callbacks, Is.EqualTo(1));
         }
 
         [Test]
@@ -261,12 +273,24 @@ namespace FarrokhGames.Inventory
         public void AddAt_ItemInTheWay_ItemNotAdded()
         {
             var inventory = new InventoryManager(new TestProvider(), 3, 3);
+
+            var callbacks = 0;
+            IInventoryItem lastItem = null;
+            inventory.onItemAddedFailed += (i) =>
+            {
+                callbacks++;
+                lastItem = i;
+            };
+            
             var item1 = CreateFullItem(3, 1);
             inventory.TryAddAt(item1, Vector2Int.zero);
             Assert.That(inventory.allItems.Count, Is.EqualTo(1));
             var item2 = CreateFullItem(1, 1);
             inventory.TryAddAt(item2, new Vector2Int(1, 0));
             Assert.That(inventory.allItems.Count, Is.EqualTo(1));
+            
+            Assert.That(lastItem, Is.Not.Null);
+            Assert.That(callbacks, Is.EqualTo(1));
         }
 
         [Test]
@@ -419,6 +443,29 @@ namespace FarrokhGames.Inventory
             Assert.That(inventory.Contains(item), Is.True);
             inventory.TryDrop(item);
             Assert.That(inventory.Contains(item), Is.False);
+        }
+        
+        [Test]
+        public void Drop_CantDrop_ItemNotRemoved()
+        {
+            var inventory = new InventoryManager(new TestProvider(), 1, 1);
+            
+            var callbacks = 0;
+            IInventoryItem lastItem = null;
+            inventory.onItemDroppedFailed += (i) =>
+            {
+                lastItem = i;
+                callbacks++;
+            };
+            
+            var item = CreateFullItem(1, 1, false);
+            inventory.TryAdd(item);
+            Assert.That(inventory.Contains(item), Is.True);
+            inventory.TryDrop(item);
+            Assert.That(inventory.Contains(item), Is.True);
+            
+            Assert.That(lastItem, Is.SameAs(item));
+            Assert.That(callbacks, Is.EqualTo(1));
         }
 
         [Test]

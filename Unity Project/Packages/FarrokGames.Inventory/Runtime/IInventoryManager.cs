@@ -9,6 +9,11 @@ namespace FarrokhGames.Inventory
         /// Invoked when an item is added to the inventory
         /// </summary>
         Action<IInventoryItem> onItemAdded { get; set; }
+        
+        /// <summary>
+        /// Invoked when an item was not able to be added to the inventory
+        /// </summary>
+        Action<IInventoryItem> onItemAddedFailed { get; set; }
 
         /// <summary>
         /// Invoked when an item is removed to the inventory
@@ -19,7 +24,12 @@ namespace FarrokhGames.Inventory
         /// Invoked when an item is removed from the inventory and should be placed on the ground.
         /// </summary>
         Action<IInventoryItem> onItemDropped { get; set; }
-
+        
+        /// <summary>
+        /// Invoked when an item was unable to be placed on the ground (most likely to its canDrop being set to false)
+        /// </summary>
+        Action<IInventoryItem> onItemDroppedFailed { get; set; }
+        
         /// <summary>
         /// Invoked when the inventory is rebuilt from scratch
         /// </summary>

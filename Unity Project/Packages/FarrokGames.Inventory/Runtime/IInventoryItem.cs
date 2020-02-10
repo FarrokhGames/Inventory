@@ -29,6 +29,11 @@ namespace FarrokhGames.Inventory
         /// of this items shape
         /// </summary>
         bool IsPartOfShape(Vector2Int localPosition);
+        
+        /// <summary>
+        /// Returns true if this item can be dropped on the ground
+        /// </summary>
+        bool canDrop { get; }
     }
 
     internal static class InventoryItemExtensions
