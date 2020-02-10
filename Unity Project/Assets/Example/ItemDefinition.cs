@@ -11,6 +11,7 @@ namespace FarrokhGames.Inventory.Examples
         [SerializeField] private Sprite _sprite = null;
         [SerializeField] private InventoryShape _shape = null;
         [SerializeField] private ItemType _type = ItemType.Utility;
+        [SerializeField] private bool _canDrop = true;
         [SerializeField, HideInInspector] private Vector2Int _position = Vector2Int.zero;
 
         /// <summary>
@@ -44,6 +45,9 @@ namespace FarrokhGames.Inventory.Examples
         {
             return _shape.IsPartOfShape(localPosition);
         }
+
+        /// <inheritdoc />
+        public bool canDrop => _canDrop;
 
         /// <summary>
         /// Creates a copy if this scriptable object

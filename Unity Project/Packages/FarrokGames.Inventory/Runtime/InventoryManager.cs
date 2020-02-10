@@ -111,10 +111,16 @@ namespace FarrokhGames.Inventory
         
         /// <inheritdoc />
         public Action<IInventoryItem> onItemDropped { get; set; }
+
+        /// <inheritdoc />
+        public Action<IInventoryItem> onItemDroppedFailed { get; set; }
         
         /// <inheritdoc />
         public Action<IInventoryItem> onItemAdded { get; set; }
         
+        /// <inheritdoc />
+        public Action<IInventoryItem> onItemAddedFailed { get; set; }
+
         /// <inheritdoc />
         public Action<IInventoryItem> onItemRemoved { get; set; }
         
@@ -166,12 +172,26 @@ namespace FarrokhGames.Inventory
         /// <inheritdoc />
         public bool TryDrop(IInventoryItem item)
         {
-            if (!CanDrop(item)) return false;
-            if (!_provider.DropInventoryItem(item)) return false;
+            if (!CanDrop(item) || !_provider.DropInventoryItem(item)) 
+			{
+				onItemDroppedFailed?.Invoke(item);
+				return false;
+			}
             Rebuild(true);
             onItemDropped?.Invoke(item);
             return true;
         }
+
+		internal bool TryForceDrop(IInventoryItem item)
+		{
+			if(!item.canDrop)
+			{
+				onItemDroppedFailed?.Invoke(item);
+				return false;
+			}
+			onItemDropped?.Invoke(item);
+			return true;
+		}
 
         /// <inheritdoc />
         public bool CanAddAt(IInventoryItem item, Vector2Int point)
@@ -207,8 +227,11 @@ namespace FarrokhGames.Inventory
         /// <inheritdoc />
         public bool TryAddAt(IInventoryItem item, Vector2Int point)
         {
-            if (!CanAddAt(item, point)) return false;
-            if(!_provider.AddInventoryItem(item)) return false;
+            if (!CanAddAt(item, point) || !_provider.AddInventoryItem(item)) 
+			{
+				onItemAddedFailed?.Invoke(item);
+				return false;
+			}
             switch (_provider.inventoryRenderMode)
             {
                 case InventoryRenderMode.Single:
@@ -279,9 +302,8 @@ namespace FarrokhGames.Inventory
         public bool CanRemove(IInventoryItem item) => Contains(item) && _provider.CanRemoveInventoryItem(item);
 
         /// <inheritdoc />
-        public bool CanDrop(IInventoryItem item) => Contains(item) && _provider.CanDropInventoryItem(item);
+        public bool CanDrop(IInventoryItem item) => Contains(item) && _provider.CanDropInventoryItem(item) && item.canDrop;
         
-
         /*
          * Get first free point that will fit the given item
          */

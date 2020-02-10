@@ -142,7 +142,10 @@ namespace FarrokhGames.Inventory
             else
             {
                 mode = DropMode.Dropped;
-                originalController.inventory.TryDrop(item); // Drop the item
+                if (!originalController.inventory.TryForceDrop(item)) // Drop the item on the ground
+                {
+                    originalController.inventory.TryAddAt(item, originPoint);
+                }
             }
 
             // Destroy the image representing the item
