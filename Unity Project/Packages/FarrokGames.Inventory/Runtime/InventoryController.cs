@@ -146,6 +146,7 @@ namespace FarrokhGames.Inventory
                 }
 
                 _draggedItem = null;
+                _currentEventData = null;
             }
 
             /*
