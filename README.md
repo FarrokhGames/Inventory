@@ -57,7 +57,7 @@ Below you can find documentation of various parts of the system. You are encoura
 
 ### <a id="gettingstarted"></a>Getting Started
 Creating a new inventory is simple. Remember that the inventory system rests within its own namespace, so don't forget to add ```using FarrokhGames.Inventory```.
-```cs
+```csharp
 var inventory = new InventoryManager(8, 4); // Creates an inventory with a width of 8 and height of 4
 ```
 
@@ -65,7 +65,7 @@ var inventory = new InventoryManager(8, 4); // Creates an inventory with a width
 
 ### <a id='theinventory'></a>The Inventory
 Below is a list of actions methods and getters within ```InventoryManager.cs```.
-```cs
+```csharp
 /// <summary>
 /// Invoked when an item is added to the inventory
 /// </summary>
@@ -208,7 +208,7 @@ IInventoryItem[] GetAtPoint(Vector2Int point, Vector2Int size);
 
 ### <a id="items"></a>Items
 Items inside the inventory are represented by the IInventoryItem interface. In the included example, this interface is attached to a ```ScritableObject``` making it possible to create, store and change item details in the asset folder.
-```cs
+```csharp
 using UnityEngine;
 using FarrokhGames.Inventory;
 
@@ -249,7 +249,7 @@ The inventory system comes with a renderer in a MonoBehaviour called ```Inventor
 
 Simply add this to a ```GameObject``` within your ```Canvas```, and connect it to an inventory using the following code.
 
-```cs
+```csharp
 /// <summary>
 /// Set what inventory to use when rendering
 /// </summary>
